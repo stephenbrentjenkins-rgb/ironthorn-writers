@@ -1,8 +1,7 @@
 ---
-# ================================================================
-#  NPC MASTER TEMPLATE — SCALED v3.0
-# ================================================================
-
+legacy: true
+legacy_reason: "Built for the Ashford worldbuild; needs full port to Ironthorn before reactivation"
+legacy_date: "2026-05-01"
 npc_name: "Commander Syla"
 npc_tier: 4
 npc_role: "Commander of the Northern Watch"

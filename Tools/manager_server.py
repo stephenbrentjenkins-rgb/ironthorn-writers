@@ -1,5 +1,5 @@
 """
-Ironthorn Manager Board Server v1.0
+Ironthorn Manager Board Server v1.1
 =====================================
 Local manager interface for reviewing writer submissions, approving/returning
 NPCs to the vault, and seeing all submission history from the Google Sheet.
@@ -224,6 +224,54 @@ def find_sheet_row_for_npc(npc_name):
             return row
     return None
 
+def get_writer_info(npc_name):
+    """
+    Look up writer name and email for an NPC, with graceful fallback when the
+    sheet isn't configured or the row isn't found.
+
+    Order of precedence:
+      1. Google Sheet row (if sheet_csv_url is configured)
+      2. Submission Form frontmatter in _Pending/<npc>/  (writer_name + writer_email)
+      3. NPC file frontmatter in _Pending/<npc>/         (submitted_by + submitted_email)
+
+    Returns: (writer_name, writer_email, source)
+        source is one of: 'sheet', 'form', 'npc_file', 'none'
+    """
+    # 1 - Try the sheet
+    sheet_row = find_sheet_row_for_npc(npc_name)
+    if sheet_row:
+        name = (sheet_row.get('Writer Name') or '').strip()
+        email = (sheet_row.get('Writer Email') or '').strip()
+        if name or email:
+            return (name or 'Unknown', email, 'sheet')
+
+    # 2 - Try the submission form
+    form_path = PENDING_DIR / npc_name / f"{npc_name}_Submission-Form.md"
+    if form_path.exists():
+        try:
+            fm = parse_frontmatter(form_path.read_text(encoding='utf-8'))
+            name = (fm.get('writer_name') or fm.get('writer') or fm.get('submitted_by') or '').strip()
+            email = (fm.get('writer_email') or fm.get('submitted_email') or fm.get('email') or '').strip()
+            if name or email:
+                return (name or 'Unknown', email, 'form')
+        except Exception:
+            pass
+
+    # 3 - Try the NPC file
+    npc_path = PENDING_DIR / npc_name / f"{npc_name}.md"
+    if npc_path.exists():
+        try:
+            fm = parse_frontmatter(npc_path.read_text(encoding='utf-8'))
+            name = (fm.get('submitted_by') or fm.get('writer_name') or fm.get('writer') or '').strip()
+            email = (fm.get('submitted_email') or fm.get('writer_email') or fm.get('email') or '').strip()
+            if name or email:
+                return (name or 'Unknown', email, 'npc_file')
+        except Exception:
+            pass
+
+    # 4 - Nothing found
+    return ('Unknown', '', 'none')
+
 # ─── EMAIL ────────────────────────────────────────────────────────────────────
 
 def send_email(to_addr, subject, body):
@@ -327,9 +375,9 @@ def approve_submission(npc_name, manager_name, send_notification=True):
 
     # 6 — Write approval record
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-    sheet_row = find_sheet_row_for_npc(npc_name)
-    writer = (sheet_row or {}).get('Writer Name', 'Unknown')
-    writer_email = (sheet_row or {}).get('Writer Email', '')
+    writer, writer_email, info_source = get_writer_info(npc_name)
+    sheet_row = find_sheet_row_for_npc(npc_name)  # still needed for sheet update step
+    log.append(f"Writer info source: {info_source}" + (f" ({writer_email})" if writer_email else " (no email)"))
     record_name = f"{npc_name}_{writer.replace(' ','-')}_{today}_APPROVED.md"
     record_path = RECORDS_DIR / record_name
     record_path.write_text(f"""---
@@ -434,9 +482,8 @@ def return_submission(npc_name, codes, notes, manager_name, send_notification=Tr
 
     # Write return record
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-    sheet_row = find_sheet_row_for_npc(npc_name)
-    writer = (sheet_row or {}).get('Writer Name', 'Unknown')
-    writer_email = (sheet_row or {}).get('Writer Email', '')
+    writer, writer_email, info_source = get_writer_info(npc_name)
+    log.append(f"Writer info source: {info_source}" + (f" ({writer_email})" if writer_email else " (no email)"))
     record_name = f"{npc_name}_{writer.replace(' ','-')}_{today}_RETURNED.md"
     record_path = RECORDS_DIR / record_name
     record_path.write_text(f"""---
@@ -685,7 +732,7 @@ def main():
         print()
 
     print()
-    print(f"  Ironthorn Manager Board v1.0")
+    print(f"  Ironthorn Manager Board v1.1")
     print(f"  =============================")
     print(f"  Vault:   {VAULT_ROOT}")
     print(f"  Pending: {len(list_pending_submissions())} submissions")

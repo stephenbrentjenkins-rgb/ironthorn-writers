@@ -4,6 +4,14 @@ doc_type: "Connection Map"
 version: "1.0"
 ---
 
+> [!warning] This document is from a previous version of the world and is being rewritten.
+> The faction names ("Gray Market", "Dawnward Order", "Iron Compact") and the city ("Ashford") referenced below are no longer canon. Current factions are listed in `Factions/`. The current city is Ironthorn. Do not use this document as reference until it has been rebuilt with current NPCs and locations.
+>
+> *Flagged: 2026-05-01*
+
+---
+
+
 # Cross-NPC Connection Map
 
 Ashford is a small enough city that its key NPCs are aware of each other — directly or indirectly. This document maps those connections and flags where they create story opportunities or risks.
