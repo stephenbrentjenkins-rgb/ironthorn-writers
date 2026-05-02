@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ironthorn — Writer Command Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1510;
+    --parchment: #f5f0e8;
+    --parchment-dark: #ede5d0;
+    --parchment-mid: #e8dfc8;
+    --iron: #2c2820;
+    --iron-mid: #3d3830;
+    --iron-light: #544e44;
+    --gold: #c49a2a;
+    --gold-dim: #8a6b1a;
+    --gold-pale: #f0d890;
+    --blood: #7a1f1f;
+    --blood-dim: #5a1515;
+    --ash: #6b6560;
+    --ash-light: #9a9490;
+    --covenant: #b8922a;
+    --circle: #2d6b2a;
+    --compact: #4a4a6a;
+    --dominion: #4a3a2a;
+    --veil: #5a3060;
+    --throne: #7a1f1f;
+    --void: #1a1520;
+    --complete: #2d6b2a;
+    --pending: #8a6b1a;
+    --queued: #4a4a4a;
+    --watch: #7a4a1a;
+  }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background-color: var(--iron);
+    color: var(--parchment);
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,0,0,0.02) 40px, rgba(0,0,0,0.02) 41px);
+  }
+
+  /* HEADER */
+  .site-header {
+    background: var(--ink);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 0;
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 2rem 1.5rem;
+  }
+  .header-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .header-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--parchment);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .header-title span {
+    color: var(--gold);
+  }
+  .header-sub {
+    font-size: 1.1rem;
+    color: var(--ash-light);
+    font-style: italic;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+  .header-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--ash);
+    text-transform: uppercase;
+  }
+  .stat-divider {
+    width: 1px;
+    background: var(--iron-light);
+    align-self: stretch;
+    margin: 0 0.5rem;
+  }
+  .progress-bar-wrap {
+    margin-top: 1.5rem;
+    background: var(--iron-mid);
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    width: 16.67%; /* 7/42 */
+    border-radius: 2px;
+    position: relative;
+  }
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(90deg, transparent, rgba(240,216,144,0.4));
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer {
+    0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; }
+  }
+
+  /* NAV */
+  .section-nav {
+    background: var(--ink);
+    border-bottom: 1px solid var(--iron-light);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .section-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.75rem 1.25rem;
+    color: var(--ash);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .nav-tab:hover { color: var(--parchment-dark); border-bottom-color: var(--iron-light); }
+  .nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* MAIN */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* CALL TO ACTION BANNER */
+  .cta-banner {
+    background: var(--ink);
+    border: 1px solid var(--gold-dim);
+    border-left: 4px solid var(--gold);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .cta-icon {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .cta-text h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gold-pale);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+  .cta-text p {
+    font-size: 0.95rem;
+    color: var(--ash-light);
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .cta-text a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--iron-light);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  /* DISTRICT SECTION */
+  .district {
+    margin-bottom: 2.5rem;
+  }
+  .district-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .district-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--parchment-dark);
+    letter-spacing: 0.08em;
+  }
+  .district-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--ash);
+    text-transform: uppercase;
+  }
+  .district-faction-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* NPC GRID */
+  .npc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* NPC CARD */
+  .npc-card {
+    background: var(--ink);
+    border: 1px solid var(--iron-light);
+    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    position: relative;
+    transition: border-color 0.2s, transform 0.15s;
+    cursor: default;
+  }
+  .npc-card:hover {
+    border-color: var(--ash);
+    transform: translateY(-1px);
+  }
+  .npc-card.complete {
+    border-left: 3px solid var(--complete);
+  }
+  .npc-card.watch {
+    border-left: 3px solid var(--watch);
+  }
+  .npc-card.pending {
+    border-left: 3px solid var(--pending);
+    opacity: 0.75;
+  }
+  .npc-card.queued {
+    border-left: 3px solid var(--queued);
+    opacity: 0.55;
+  }
+
+  .npc-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+  .npc-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--parchment);
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+    flex: 1;
+    margin-right: 0.5rem;
+  }
+  .npc-tier {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--ash);
+    background: var(--iron-mid);
+    padding: 2px 6px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .npc-role {
+    font-size: 0.8rem;
+    color: var(--ash-light);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .npc-flags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .flag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 5px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+  .flag-complete { background: rgba(45,107,42,0.25); color: #7ab878; border: 1px solid rgba(45,107,42,0.4); }
+  .flag-watch { background: rgba(122,74,26,0.25); color: #c4943a; border: 1px solid rgba(122,74,26,0.4); }
+  .flag-anchor { background: rgba(196,154,42,0.2); color: #c49a2a; border: 1px solid rgba(196,154,42,0.3); }
+  .flag-spy { background: rgba(90,48,96,0.3); color: #c090d0; border: 1px solid rgba(90,48,96,0.5); }
+  .flag-story { background: rgba(42,74,100,0.3); color: #7ab4d4; border: 1px solid rgba(42,74,100,0.5); }
+  .flag-bg { background: var(--iron-mid); color: var(--ash); border: 1px solid var(--iron-light); }
+  .flag-open { background: rgba(200,100,30,0.2); color: #e0903a; border: 1px solid rgba(200,100,30,0.4); font-style: italic; }
+
+  .npc-card.complete .npc-name { color: var(--parchment); }
+  .npc-card.queued .npc-name { color: var(--ash-light); }
+
+  /* STORY POINTS */
+  .story-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .story-card {
+    background: var(--ink);
+    border: 1px solid var(--iron-light);
+    border-radius: 4px;
+    padding: 1.1rem 1.25rem;
+    position: relative;
+  }
+  .story-card.active { border-top: 3px solid var(--gold); }
+  .story-card.latent { border-top: 3px solid var(--iron-light); }
+  .story-card.threshold { border-top: 3px solid var(--blood); }
+  .story-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ash);
+    margin-bottom: 0.5rem;
+  }
+  .story-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--parchment-dark);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.03em;
+  }
+  .story-body {
+    font-size: 0.9rem;
+    color: var(--ash-light);
+    line-height: 1.55;
+    font-style: italic;
+    margin-bottom: 0.75rem;
+  }
+  .story-npcs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .story-npc-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .chip-built { background: rgba(45,107,42,0.2); color: #7ab878; border: 1px solid rgba(45,107,42,0.3); }
+  .chip-needed { background: rgba(122,74,26,0.2); color: #c4943a; border: 1px solid rgba(122,74,26,0.3); }
+
+  /* THRESHOLD BARS */
+  .threshold-section { margin-bottom: 2rem; }
+  .threshold-card {
+    background: var(--ink);
+    border: 1px solid var(--iron-light);
+    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.5rem;
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    align-items: center;
+    gap: 1rem;
+  }
+  .threshold-npc { font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--parchment); }
+  .threshold-bar-track {
+    height: 4px;
+    background: var(--iron-mid);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .threshold-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+  .bar-warning { background: #c4943a; }
+  .bar-danger { background: var(--blood); }
+  .threshold-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ash-light);
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  /* OPEN CALLS */
+  .open-call {
+    background: var(--ink);
+    border: 1px solid var(--iron-light);
+    border-left: 3px solid var(--gold);
+    border-radius: 4px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .open-call-priority {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold-dim);
+    min-width: 24px;
+    line-height: 1;
+    margin-top: 2px;
+  }
+  .open-call-body h4 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--parchment);
+    margin-bottom: 0.3rem;
+    letter-spacing: 0.03em;
+  }
+  .open-call-body p {
+    font-size: 0.875rem;
+    color: var(--ash-light);
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .open-call-tags {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .open-call.urgent { border-left-color: var(--blood); }
+  .open-call.urgent .open-call-priority { color: #c04040; }
+
+  /* PIPELINE STATUS */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--iron-light);
+    border: 1px solid var(--iron-light);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+  }
+  .pipeline-stage {
+    background: var(--ink);
+    padding: 1rem;
+    text-align: center;
+  }
+  .pipeline-count {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+  .pipeline-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ash);
+    margin-bottom: 0.5rem;
+  }
+  .pipeline-bar {
+    height: 2px;
+    border-radius: 1px;
+    margin: 0 auto;
+  }
+  .p-complete .pipeline-count { color: #7ab878; }
+  .p-complete .pipeline-bar { background: var(--complete); width: 100%; }
+  .p-watch .pipeline-count { color: #c4943a; }
+  .p-watch .pipeline-bar { background: var(--watch); width: 60%; }
+  .p-open .pipeline-count { color: #7ab4d4; }
+  .p-open .pipeline-bar { background: #2a5070; width: 80%; }
+  .p-pending .pipeline-count { color: var(--ash-light); }
+  .p-pending .pipeline-bar { background: var(--ash); width: 30%; }
+
+  /* SECTION PANELS */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--iron-light);
+    padding: 1.5rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .footer-left {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: var(--ash);
+    text-transform: uppercase;
+  }
+  .footer-right {
+    font-size: 0.85rem;
+    color: var(--ash);
+    font-style: italic;
+  }
+
+  /* SUBMIT CTA */
+  .submit-cta {
+    background: var(--ink);
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .submit-cta h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--gold-pale);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  .submit-cta p {
+    font-size: 1rem;
+    color: var(--ash-light);
+    line-height: 1.6;
+    font-style: italic;
+    max-width: 600px;
+    margin: 0 auto 1.25rem;
+  }
+  .submit-steps {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .submit-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--ash-light);
+    text-transform: uppercase;
+    padding: 0 1rem;
+    position: relative;
+  }
+  .submit-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -6px;
+    color: var(--gold-dim);
+  }
+  .submit-step-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .submit-email {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--gold);
+    background: rgba(196,154,42,0.1);
+    border: 1px solid var(--gold-dim);
+    border-radius: 3px;
+    padding: 0.5rem 1rem;
+    display: inline-block;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-eyebrow">Ironthorn RPG — Writer Command Board · v2.1</div>
+    <h1 class="header-title">The <span>Ironthorn</span> Registry</h1>
+    <p class="header-sub">Active NPC roster, open commissions, and story thread status — updated as files are admitted to the vault.</p>
+    <div class="header-stats">
+      <div class="stat">
+        <span class="stat-value">7</span>
+        <span class="stat-label">NPCs filed</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">42</span>
+        <span class="stat-label">Total defined</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">35</span>
+        <span class="stat-label">Open commissions</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">3</span>
+        <span class="stat-label">Watch flags active</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value">16.7%</span>
+        <span class="stat-label">Roster complete</span>
+      </div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill"></div>
+    </div>
+  </div>
+</header>
+
+<nav class="section-nav">
+  <div class="section-nav-inner">
+    <button class="nav-tab active" onclick="showPanel('roster')">NPC Roster</button>
+    <button class="nav-tab" onclick="showPanel('story')">Story Threads</button>
+    <button class="nav-tab" onclick="showPanel('watch')">Watch Flags</button>
+    <button class="nav-tab" onclick="showPanel('open')">Open Commissions</button>
+    <button class="nav-tab" onclick="showPanel('submit')">Submit Work</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ROSTER PANEL -->
+  <div id="panel-roster" class="panel active">
+
+    <div class="pipeline">
+      <div class="pipeline-stage p-complete">
+        <div class="pipeline-count">7</div>
+        <div class="pipeline-label">Complete</div>
+        <div class="pipeline-bar"></div>
+      </div>
+      <div class="pipeline-stage p-watch">
+        <div class="pipeline-count">3</div>
+        <div class="pipeline-label">Watch flags</div>
+        <div class="pipeline-bar"></div>
+      </div>
+      <div class="pipeline-stage p-open">
+        <div class="pipeline-count">35</div>
+        <div class="pipeline-label">Open</div>
+        <div class="pipeline-bar"></div>
+      </div>
+      <div class="pipeline-stage p-pending">
+        <div class="pipeline-count">0</div>
+        <div class="pipeline-label">Pending review</div>
+        <div class="pipeline-bar"></div>
+      </div>
+    </div>
+
+    <!-- SANCTUM WARD -->
+    <div class="district">
+      <div class="district-header">
+        <div class="district-name">Sanctum Ward</div>
+        <div class="district-meta"><span class="district-faction-dot" style="background:#c49a2a"></span>Aureate Covenant · Upper City</div>
+      </div>
+      <div class="npc-grid">
+        <div class="npc-card complete">
+          <div class="npc-card-top"><span class="npc-name">Brother Aldric</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Cleric; spiritual director</div>
+          <div class="npc-flags"><span class="flag flag-complete">Complete</span><span class="flag flag-watch">Watch</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Inquisitor-Commander Leth</span><span class="npc-tier">T4</span></div>
+          <div class="npc-role">Sub-Order commander; Chapter House</div>
+          <div class="npc-flags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Torven Ashcroft</span><span class="npc-tier">T4</span></div>
+          <div class="npc-role">Minor noble; Throne spy · Aldric's penitent</div>
+          <div class="npc-flags"><span class="flag flag-spy">Spy #7</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Nelle Davar</span><span class="npc-tier">T4</span></div>
+          <div class="npc-role">Records clerk; Compact spy</div>
+          <div class="npc-flags"><span class="flag flag-spy">Spy #1</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Solta Byrne</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Innkeeper; The Hearthstone</div>
+          <div class="npc-flags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Ser Orvane</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Watch Commander, Ward Station</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Registrar Celn Avour</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Office of the Record (senior)</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Mirren</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Alchemist; Mirren's Compound</div>
+          <div class="npc-flags"><span class="flag flag-bg">Background</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Arnath</span><span class="npc-tier">T1</span></div>
+          <div class="npc-role">General vendor; Arnath's Provisions</div>
+          <div class="npc-flags"><span class="flag flag-bg">Background</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GREENWARD -->
+    <div class="district">
+      <div class="district-header">
+        <div class="district-name">Greenward</div>
+        <div class="district-meta"><span class="district-faction-dot" style="background:#2d6b2a"></span>Verdant Circle · Upper City</div>
+      </div>
+      <div class="npc-grid">
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Grove-Keeper Sennath</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Circle's Ironthorn representative</div>
+          <div class="npc-flags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Verath of the Still Hand</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Head cleric; alchemist</div>
+          <div class="npc-flags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Iravel</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Commons Clerk; Office of the Commons</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Sellen</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Trade broker; Sellen's Exchange</div>
+          <div class="npc-flags"><span class="flag flag-bg">Background</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEDGER ROW -->
+    <div class="district">
+      <div class="district-header">
+        <div class="district-name">Ledger Row</div>
+        <div class="district-meta"><span class="district-faction-dot" style="background:#4a4a6a"></span>Gray Compact · The Divide</div>
+      </div>
+      <div class="npc-grid">
+        <div class="npc-card complete watch">
+          <div class="npc-card-top"><span class="npc-name">Auditor Vesh</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Internal affairs; Contract Hall</div>
+          <div class="npc-flags"><span class="flag flag-complete">Complete</span><span class="flag flag-watch">Watch</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Factor Renne Saul</span><span class="npc-tier">T4</span></div>
+          <div class="npc-role">Senior Compact broker; The Exchange</div>
+          <div class="npc-flags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Oswin Creel</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Cartographer; Circle spy</div>
+          <div class="npc-flags"><span class="flag flag-spy">Spy #4</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Orvan Sel</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Barkeep; The Neutral Table</div>
+          <div class="npc-flags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Treasurer Vasken Oull</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Office of the Treasury</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASHGATE QUARTER -->
+    <div class="district">
+      <div class="district-header">
+        <div class="district-name">Ashgate Quarter</div>
+        <div class="district-meta"><span class="district-faction-dot" style="background:#5a3060"></span>Ashen Veil (unofficial) · Lower City</div>
+      </div>
+      <div class="npc-grid">
+        <div class="npc-card complete watch">
+          <div class="npc-card-top"><span class="npc-name">Scholar-Physician Dael</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Veil mid-rank; Quarter clinician</div>
+          <div class="npc-flags"><span class="flag flag-complete">Complete</span><span class="flag flag-watch">Watch</span></div>
+        </div>
+        <div class="npc-card complete watch">
+          <div class="npc-card-top"><span class="npc-name">Davan Ord</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Forge master; repair annex</div>
+          <div class="npc-flags"><span class="flag flag-complete">Complete</span><span class="flag flag-watch">Watch</span></div>
+        </div>
+        <div class="npc-card complete">
+          <div class="npc-card-top"><span class="npc-name">Maren Voss</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Merchant; relic smuggler</div>
+          <div class="npc-flags"><span class="flag flag-complete">Complete</span><span class="flag flag-story">Story</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Cress</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Render yard; trade broker</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Works Director Havel</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Office of Works</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Pell</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Unlicensed alchemist; Pell's Back Room</div>
+          <div class="npc-flags"><span class="flag flag-bg">Background</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WOUND MARKET -->
+    <div class="district">
+      <div class="district-header">
+        <div class="district-name">Wound Market</div>
+        <div class="district-meta"><span class="district-faction-dot" style="background:#7a1f1f"></span>Crimson Throne (indirect) · Lower City</div>
+      </div>
+      <div class="npc-grid">
+        <div class="npc-card complete">
+          <div class="npc-card-top"><span class="npc-name">Sevin</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Tolerance Director; lower-city power broker</div>
+          <div class="npc-flags"><span class="flag flag-complete">Complete</span><span class="flag flag-anchor">Anchor</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Petrov Seld</span><span class="npc-tier">T4</span></div>
+          <div class="npc-role">Luxury supplier; Compact dead-drop</div>
+          <div class="npc-flags"><span class="flag flag-spy">Spy #8</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">The Collector</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Throne administrator; Overseer's Seat</div>
+          <div class="npc-flags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Arcanist Vorell</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Blood-bound arcanist</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Essa</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">The Mender; repair operator</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Sel Harrow</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Proprietor; The Restless House</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THE HOLLOWS -->
+    <div class="district">
+      <div class="district-header">
+        <div class="district-name">The Hollows</div>
+        <div class="district-meta"><span class="district-faction-dot" style="background:#1a1520"></span>Unknown · Beneath the city</div>
+      </div>
+      <div class="npc-grid">
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">Rynn Ashav</span><span class="npc-tier">T3</span></div>
+          <div class="npc-role">Missing Compact field agent</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+        <div class="npc-card queued">
+          <div class="npc-card-top"><span class="npc-name">The Guttered</span><span class="npc-tier">T2</span></div>
+          <div class="npc-role">Alignment-gated Hollows guide</div>
+          <div class="npc-flags"><span class="flag flag-story">Story</span><span class="flag flag-open">Open commission</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-roster -->
+
+  <!-- STORY PANEL -->
+  <div id="panel-story" class="panel">
+    <div class="section-title">Active story threads</div>
+    <div class="story-grid">
+
+      <div class="story-card active">
+        <div class="story-tag">Active · Gray Compact</div>
+        <div class="story-title">The Auditor's Defection</div>
+        <div class="story-body">Vesh has found his own dossier altered. He is one threshold from defecting — and handing the player the Spy Registry. The Compact does not yet know what he is building.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-built">Auditor Vesh ✓</span>
+          <span class="story-npc-chip chip-needed">Factor Renne Saul</span>
+        </div>
+      </div>
+
+      <div class="story-card active">
+        <div class="story-tag">Active · Ashen Veil</div>
+        <div class="story-title">The Energy Source</div>
+        <div class="story-body">Dael has three disappearance correlations in a parallel ledger he has never shown anyone. He is one confirmation from knowing what the Veil's resurrections actually cost.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-built">Scholar-Physician Dael ✓</span>
+          <span class="story-npc-chip chip-needed">Arcanist Vorell</span>
+          <span class="story-npc-chip chip-needed">Covenant Agent</span>
+        </div>
+      </div>
+
+      <div class="story-card active">
+        <div class="story-tag">Active · Ashgate Quarter</div>
+        <div class="story-title">The Forge and the Building</div>
+        <div class="story-body">Davan Ord has known for two years what is in the Ashgate Lane building. He has the floor plan from memory. The player is the first person who might make stopping feel like something other than destruction.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-built">Davan Ord ✓</span>
+          <span class="story-npc-chip chip-built">Scholar-Physician Dael ✓</span>
+          <span class="story-npc-chip chip-needed">Works Director Havel</span>
+        </div>
+      </div>
+
+      <div class="story-card active">
+        <div class="story-tag">Active · Gray Compact</div>
+        <div class="story-title">The Dead-Drop and the Missing Agent</div>
+        <div class="story-body">Rynn Ashav missed check-in four months ago. Petrov Seld is holding the dead-drop. Sevin has been watching Petrov's operation for two years without acting. The Hollows holds whatever Rynn found.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-built">Sevin ✓</span>
+          <span class="story-npc-chip chip-needed">Petrov Seld</span>
+          <span class="story-npc-chip chip-needed">Rynn Ashav</span>
+          <span class="story-npc-chip chip-needed">The Guttered</span>
+        </div>
+      </div>
+
+      <div class="story-card active">
+        <div class="story-tag">Active · Gray Compact</div>
+        <div class="story-title">The Debt that Doesn't Clear</div>
+        <div class="story-body">Maren Voss has known for four years the debt will never clear. She is building a case to destroy Drael entirely. The evidence is behind a false panel. One trusted contact is all she needs.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-built">Maren Voss ✓</span>
+          <span class="story-npc-chip chip-needed">Factor Renne Saul</span>
+        </div>
+      </div>
+
+      <div class="story-card latent">
+        <div class="story-tag">Latent · Aureate Covenant</div>
+        <div class="story-title">Torven in the Confession Chair</div>
+        <div class="story-body">Aldric is reviewing his caseload. Torven's tithing looks like payment for access. Aldric has not made the connection — but his disillusionment is rising. One scene tips it.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-built">Brother Aldric ✓</span>
+          <span class="story-npc-chip chip-needed">Torven Ashcroft</span>
+          <span class="story-npc-chip chip-needed">Inquisitor-Commander Leth</span>
+        </div>
+      </div>
+
+      <div class="story-card latent">
+        <div class="story-tag">Latent · Wound Market</div>
+        <div class="story-title">The Certificate</div>
+        <div class="story-body">Nineteen years ago Sevin issued a document for something she did not understand. Eight months ago she found out what it was. She has been deciding what to do with it. The player is the likely vector.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-built">Sevin ✓</span>
+          <span class="story-npc-chip chip-needed">The Collector</span>
+        </div>
+      </div>
+
+      <div class="story-card threshold">
+        <div class="story-tag">Threshold · Void Eternum</div>
+        <div class="story-title">What Rynn Saw in the Hollows</div>
+        <div class="story-body">The Void Eternum profile operation sent Rynn into the Hollows. She found something. The player walking the same observation path at Perception 10 begins to see what she saw. This is the entry to the Eternum arc.</div>
+        <div class="story-npcs">
+          <span class="story-npc-chip chip-needed">Rynn Ashav</span>
+          <span class="story-npc-chip chip-needed">The Guttered</span>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /panel-story -->
+
+  <!-- WATCH PANEL -->
+  <div id="panel-watch" class="panel">
+    <div class="section-title">Resentment approaching betrayal threshold (7+)</div>
+    <div class="threshold-section">
+      <div class="threshold-card">
+        <div class="threshold-npc">Auditor Vesh</div>
+        <div class="threshold-bar-track"><div class="threshold-bar-fill bar-danger" style="width: 87.5%"></div></div>
+        <div class="threshold-val">7 / 8 — NEAR THRESHOLD</div>
+      </div>
+    </div>
+
+    <div class="section-title">Disillusionment approaching collapse (7+)</div>
+    <div class="threshold-section">
+      <div class="threshold-card">
+        <div class="threshold-npc">Scholar-Physician Dael</div>
+        <div class="threshold-bar-track"><div class="threshold-bar-fill bar-danger" style="width: 87.5%"></div></div>
+        <div class="threshold-val">7 / 8 — NEAR THRESHOLD</div>
+      </div>
+      <div class="threshold-card">
+        <div class="threshold-npc">Sevin</div>
+        <div class="threshold-bar-track"><div class="threshold-bar-fill bar-warning" style="width: 100%"></div></div>
+        <div class="threshold-val">9 / 10 — CRITICAL</div>
+      </div>
+      <div class="threshold-card">
+        <div class="threshold-npc">Davan Ord</div>
+        <div class="threshold-bar-track"><div class="threshold-bar-fill bar-warning" style="width: 85.7%"></div></div>
+        <div class="threshold-val">6 / 7 — APPROACHING</div>
+      </div>
+    </div>
+
+    <div class="section-title">High paranoia — pre-emptive escalation risk (7+)</div>
+    <div class="threshold-section">
+      <div class="threshold-card">
+        <div class="threshold-npc">Sevin</div>
+        <div class="threshold-bar-track"><div class="threshold-bar-fill bar-warning" style="width: 50%"></div></div>
+        <div class="threshold-val">5 / 10 — alert</div>
+      </div>
+      <div class="threshold-card">
+        <div class="threshold-npc">Scholar-Physician Dael</div>
+        <div class="threshold-bar-track"><div class="threshold-bar-fill bar-warning" style="width: 75%"></div></div>
+        <div class="threshold-val">6 / 10 — rising</div>
+      </div>
+    </div>
+  </div><!-- /panel-watch -->
+
+  <!-- OPEN COMMISSIONS -->
+  <div id="panel-open" class="panel">
+
+    <div class="cta-banner">
+      <div class="cta-icon">&#x2692;</div>
+      <div class="cta-text">
+        <h3>Open commissions — 35 NPCs awaiting writers</h3>
+        <p>Each commission below is an open NPC slot. Writers who have completed certification may claim any commission. Priority commissions are marked — they unlock major story threads and are reviewed first. See the Submit tab for the full submission path.</p>
+      </div>
+    </div>
+
+    <div class="section-title">Priority builds — story-critical</div>
+
+    <div class="open-call urgent">
+      <div class="open-call-priority">1</div>
+      <div class="open-call-body">
+        <h4>Factor Renne Saul — Gray Compact</h4>
+        <p>Senior Compact broker and The Exchange anchor. Handler for two active spy operations. Without him, the Auditor Vesh defection thread cannot complete and Maren Voss's counter-operation has no adversarial target. Ledger Row has no primary Compact voice until this is built.</p>
+        <div class="open-call-tags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-story">Vesh thread</span><span class="flag flag-story">Maren thread</span><span class="flag flag-tier" style="background:rgba(122,74,26,0.2);color:#c4943a;border:1px solid rgba(122,74,26,0.3);font-family:'JetBrains Mono',monospace;font-size:0.55rem;padding:2px 5px;border-radius:2px;">Tier 4</span></div>
+      </div>
+    </div>
+
+    <div class="open-call urgent">
+      <div class="open-call-priority">2</div>
+      <div class="open-call-body">
+        <h4>Grove-Keeper Sennath — Verdant Circle</h4>
+        <p>Circle's Ironthorn representative and Root Court anchor. The Circle has no voice in the city until this is built. Sennath is also the only NPC positioned to detect Oswin Creel's true loyalty.</p>
+        <div class="open-call-tags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-story">Root Court thread</span></div>
+      </div>
+    </div>
+
+    <div class="open-call urgent">
+      <div class="open-call-priority">3</div>
+      <div class="open-call-body">
+        <h4>Essa — Wound Market</h4>
+        <p>The Mender. One name only. No history given. Alignment is unreadable — the only NPC in the roster with no declared faction or alignment, by design. This is a wildcard build: the writer defines what makes her unreadable and why it holds.</p>
+        <div class="open-call-tags"><span class="flag flag-story">Wildcard</span><span class="flag flag-open">Alignment undefined</span></div>
+      </div>
+    </div>
+
+    <div class="open-call">
+      <div class="open-call-priority">4</div>
+      <div class="open-call-body">
+        <h4>Solta Byrne — The Hearthstone</h4>
+        <p>Innkeeper and upper-city intelligence anchor. The Hearthstone is the social hub of the Sanctum Ward — the place where information crosses faction lines in casual conversation. Solta hears everything.</p>
+        <div class="open-call-tags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-story">Upper city intel</span></div>
+      </div>
+    </div>
+
+    <div class="open-call">
+      <div class="open-call-priority">5</div>
+      <div class="open-call-body">
+        <h4>Orvan Sel — The Neutral Table</h4>
+        <p>Barkeep and cross-faction meeting point. The Neutral Table is the one location in the city where all factions tolerate each other's presence. Orvan has been watching these meetings for years.</p>
+        <div class="open-call-tags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-story">Cross-faction</span></div>
+      </div>
+    </div>
+
+    <div class="open-call">
+      <div class="open-call-priority">6</div>
+      <div class="open-call-body">
+        <h4>Torven Ashcroft — Sanctum Ward</h4>
+        <p>Minor noble and Throne spy embedded in Aldric's penitent caseload. His tithing pattern is the tell. Aldric is approaching the moment he makes the connection. Torven must be built before that scene can be written.</p>
+        <div class="open-call-tags"><span class="flag flag-spy">Registry #7</span><span class="flag flag-story">Aldric burn condition</span></div>
+      </div>
+    </div>
+
+    <div class="open-call">
+      <div class="open-call-priority">7</div>
+      <div class="open-call-body">
+        <h4>Petrov Seld — Wound Market</h4>
+        <p>Luxury supplier cover for the Gray Compact's dead-drop operation. Handler for the missing agent Rynn Ashav. Sevin has been watching him for two years. This build activates the Hollows arc.</p>
+        <div class="open-call-tags"><span class="flag flag-spy">Registry #8 handler</span><span class="flag flag-story">Hollows arc</span></div>
+      </div>
+    </div>
+
+    <div class="open-call">
+      <div class="open-call-priority">8</div>
+      <div class="open-call-body">
+        <h4>Rynn Ashav — The Hollows</h4>
+        <p>Missing Compact field agent. Last known location: The Hollows. Four months since check-in. This is the Void Eternum entry point. What Rynn found is the thing the player walks into at Perception 10.</p>
+        <div class="open-call-tags"><span class="flag flag-spy">Registry #8</span><span class="flag flag-story">Void Eternum arc</span></div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:1.5rem;">Secondary builds — story threads and district texture</div>
+
+    <div class="open-call">
+      <div class="open-call-priority">9</div>
+      <div class="open-call-body">
+        <h4>Arcanist Vorell — Wound Market</h4>
+        <p>Blood-bound arcanist. Key node in the Veil's Ironthorn operation. Dael's clinical documentation tracks correlations that point toward Vorell's building. The Covenant agent's burn condition accelerates once Dael starts asking questions publicly.</p>
+        <div class="open-call-tags"><span class="flag flag-story">Veil thread</span><span class="flag flag-story">Dael arc</span></div>
+      </div>
+    </div>
+
+    <div class="open-call">
+      <div class="open-call-priority">10</div>
+      <div class="open-call-body">
+        <h4>Inquisitor-Commander Leth — Sanctum Ward</h4>
+        <p>Runs the Covenant Sub-Order and Chapter House. The only Covenant NPC who knows the full internal structure and the Triune deadlock. Handles Torven Ashcroft's operation personally.</p>
+        <div class="open-call-tags"><span class="flag flag-anchor">Anchor</span><span class="flag flag-story">Covenant command</span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-open -->
+
+  <!-- SUBMIT PANEL -->
+  <div id="panel-submit" class="panel">
+
+    <div class="submit-cta">
+      <h3>Ready to write for Ironthorn?</h3>
+      <p>Complete the certification path, build your NPC from the template, and submit. The lead writer reviews all submissions within five business days. Priority commissions (marked above) are reviewed in three.</p>
+      <div class="submit-steps">
+        <div class="submit-step"><span class="submit-step-num">1</span>Read the Primer</div>
+        <div class="submit-step"><span class="submit-step-num">2</span>Pass the Quiz (80%)</div>
+        <div class="submit-step"><span class="submit-step-num">3</span>Build the NPC</div>
+        <div class="submit-step"><span class="submit-step-num">4</span>Complete the form</div>
+        <div class="submit-step"><span class="submit-step-num">5</span>Submit to vault</div>
+      </div>
+      <div class="submit-email">stephenbrentjenkins@gmail.com</div>
+    </div>
+
+    <div class="section-title">Submission requirements at a glance</div>
+
+    <div class="story-grid">
+      <div class="story-card active">
+        <div class="story-tag">Criterion 1</div>
+        <div class="story-title">Tone</div>
+        <div class="story-body">The NPC is tired, not broken. No speeches. No monologuing inner states. Suppression, not performance. Every line should sound like something a real person says in that moment.</div>
+      </div>
+      <div class="story-card active">
+        <div class="story-tag">Criterion 2</div>
+        <div class="story-title">Tell System</div>
+        <div class="story-body">Three tiers: surface (Perception 0), mid (5–6), deep (7+). All writable as stage direction. Surface tell always active. Deep tell fires on lie-catch regardless of Perception. Consistent across every scene.</div>
+      </div>
+      <div class="story-card active">
+        <div class="story-tag">Criterion 3</div>
+        <div class="story-title">Flag Accuracy</div>
+        <div class="story-body">Flags are set by mechanics, not writers. All boolean flags start at false unless mechanically justified. leverage_held and debt_flag_active travel together — never one without the other.</div>
+      </div>
+      <div class="story-card active">
+        <div class="story-tag">Criterion 4</div>
+        <div class="story-title">Voice</div>
+        <div class="story-body">Vocabulary constrained by background. Simpler under pressure, not more eloquent. At least one silence written as stage direction. Three test lines written before drafting — none used in the final file.</div>
+      </div>
+      <div class="story-card active">
+        <div class="story-tag">Criterion 5 · Tier 3+</div>
+        <div class="story-title">Decision Map</div>
+        <div class="story-body">Five steps: survival check → leverage check → alignment filter → cunning filter → faction filter. In-world response line specific to this character. Reflects true alignment, not public alignment.</div>
+      </div>
+      <div class="story-card latent">
+        <div class="story-tag">Review Window</div>
+        <div class="story-title">Timeline</div>
+        <div class="story-body">Standard review: 5 business days. Priority commissions (Tier 4+ or story-critical): 3 business days. Resubmissions after return: 3 business days, returned criteria only.</div>
+      </div>
+    </div>
+
+  </div><!-- /panel-submit -->
+
+</main>
+
+<footer>
+  <div class="footer-left">Ironthorn Registry · Vault v2.1 · Template v3.0 · Engine: Unreal 5.5 · Updated 2026-04-30</div>
+  <div class="footer-right">42 NPCs defined · 7 complete · 35 open</div>
+</footer>
+
+<script>
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

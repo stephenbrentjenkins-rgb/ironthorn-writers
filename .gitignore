@@ -1,0 +1,33 @@
+# ───────────────────────────────────────────────────────
+# .gitignore — Ironthorn GameVault
+# ───────────────────────────────────────────────────────
+
+# Sensitive config — has shared password and Gmail SMTP app password
+Tools/manager_config.json
+
+# Obsidian per-machine state — workspace, hotkeys, plugin cache
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+.obsidian/plugins/*/data.json
+.obsidian/graph.json
+.obsidian/canvas.json
+.trash/
+
+# Excalidraw temp files
+*.excalidraw.svg.tmp
+
+# Python / OS junk
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE leftovers
+.vscode/
+.idea/
+*.swp
+*~
+*.bak

@@ -1,0 +1,14 @@
+{
+  "_comment_1": "Copy this file to manager_config.json and fill in real values.",
+  "_comment_2": "manager_config.json is the live file the server reads. This .example file is a template.",
+
+  "shared_password": "CHANGE_ME_to_a_real_password",
+
+  "manager_email": "stephenbrentjenkins@gmail.com",
+
+  "_comment_smtp": "Generate an app password at https://myaccount.google.com/apppasswords. NOT your regular Google password — Gmail will reject that. The app password is a 16-character string with no spaces.",
+  "smtp_app_password": "xxxxxxxxxxxxxxxx",
+
+  "_comment_sheet": "Optional. To enable the Sheet History tab, in Google Sheets do File -> Share -> Publish to web, choose the Submissions sheet, format CSV, and paste the URL here. Leave as empty string to disable.",
+  "sheet_csv_url": ""
+}

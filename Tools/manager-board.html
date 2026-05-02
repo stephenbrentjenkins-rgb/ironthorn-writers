@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ironthorn — Manager Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a1510;--parchment:#f5f0e8;--parchment-dark:#ede5d0;
+  --iron:#2c2820;--iron-mid:#3d3830;--iron-light:#544e44;
+  --gold:#c49a2a;--gold-dim:#8a6b1a;--gold-pale:#f0d890;
+  --ash:#6b6560;--ash-light:#9a9490;
+  --blood:#7a1f1f;--blood-pale:#e07070;
+  --green:#7ab878;--green-dim:#2d6b2a;
+  --warn:#c4943a;
+}
+body{font-family:'Crimson Pro',Georgia,serif;background:var(--iron);color:var(--parchment);min-height:100vh;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px),
+    repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(0,0,0,0.02) 40px,rgba(0,0,0,0.02) 41px);}
+.hdr{background:var(--ink);border-bottom:2px solid var(--gold-dim);padding:1.5rem 2rem;}
+.hdr-eye{font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;color:var(--gold-dim);text-transform:uppercase;margin-bottom:0.4rem;}
+.hdr-title{font-family:'Cinzel',serif;font-size:2rem;font-weight:700;color:var(--parchment);}
+.hdr-title span{color:var(--gold);}
+.hdr-sub{font-size:0.95rem;color:var(--ash-light);font-style:italic;margin-top:0.25rem;}
+.hdr-stats{display:flex;gap:2rem;margin-top:1rem;flex-wrap:wrap;align-items:baseline;}
+.hdr-stat{display:flex;flex-direction:column;gap:2px;}
+.hdr-stat-val{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:700;color:var(--gold);line-height:1;}
+.hdr-stat-lab{font-family:'JetBrains Mono',monospace;font-size:0.55rem;letter-spacing:0.12em;color:var(--ash);text-transform:uppercase;}
+.hdr-status{font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;color:var(--ash-light);margin-left:auto;display:flex;align-items:center;gap:0.5rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+.dot.off{background:var(--blood);box-shadow:0 0 8px var(--blood);}
+.tabs{display:flex;background:var(--ink);border-bottom:1px solid var(--iron-light);padding:0 2rem;gap:0;overflow-x:auto;}
+.tab{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ash);background:transparent;border:none;border-bottom:2px solid transparent;padding:0.85rem 1.25rem;cursor:pointer;white-space:nowrap;}
+.tab:hover{color:var(--gold-pale);}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab-count{display:inline-block;font-size:0.6rem;color:var(--gold-pale);background:rgba(196,154,42,0.15);padding:1px 7px;border-radius:9px;margin-left:6px;border:1px solid var(--gold-dim);}
+main{max-width:1400px;margin:0 auto;padding:1.5rem 2rem;}
+.panel{display:none;}.panel.active{display:block;}
+/* LOGIN */
+.login-wrap{max-width:440px;margin:5rem auto 0;}
+.card{background:var(--ink);border:1px solid var(--iron-light);border-radius:4px;padding:1.75rem 2rem;margin-bottom:1.5rem;}
+.card-title{font-family:'Cinzel',serif;font-size:0.75rem;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold-dim);padding-bottom:0.6rem;border-bottom:1px solid var(--iron-light);margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;}
+.card-title::before{content:'';display:inline-block;width:16px;height:1px;background:var(--gold);}
+label{display:block;font-family:'JetBrains Mono',monospace;font-size:0.63rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ash-light);margin-bottom:0.35rem;}
+input,select,textarea{width:100%;background:var(--iron-mid);border:1px solid var(--iron-light);border-radius:3px;color:var(--parchment);font-family:'Crimson Pro',Georgia,serif;font-size:1rem;padding:0.6rem 0.75rem;outline:none;transition:border-color 0.2s;}
+input:focus,textarea:focus,select:focus{border-color:var(--gold-dim);}
+textarea{resize:vertical;line-height:1.6;font-family:'JetBrains Mono',monospace;font-size:0.85rem;}
+.field{margin-bottom:1rem;}
+.btn-primary{font-family:'Cinzel',serif;font-size:0.85rem;font-weight:600;letter-spacing:0.1em;color:var(--gold-pale);background:transparent;border:1px solid var(--gold-dim);border-radius:3px;padding:0.7rem 1.5rem;cursor:pointer;transition:background 0.2s;}
+.btn-primary:hover{background:rgba(196,154,42,0.1);}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-approve{border-color:var(--green);color:var(--green);}
+.btn-approve:hover{background:rgba(122,184,120,0.1);}
+.btn-return{border-color:var(--blood-pale);color:var(--blood-pale);}
+.btn-return:hover{background:rgba(122,31,31,0.15);}
+.btn-secondary{font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ash);background:transparent;border:1px solid var(--iron-light);border-radius:3px;padding:0.5rem 0.9rem;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{color:var(--parchment);border-color:var(--ash);}
+/* LIST + DETAIL */
+.layout{display:grid;grid-template-columns:380px 1fr;gap:1.5rem;}
+@media(max-width:900px){.layout{grid-template-columns:1fr;}}
+.list-col{display:flex;flex-direction:column;gap:0.5rem;}
+.row{background:var(--ink);border:1px solid var(--iron-light);border-radius:3px;padding:0.85rem 1rem;cursor:pointer;transition:border-color 0.15s;}
+.row:hover{border-color:var(--gold-dim);}
+.row.selected{border-color:var(--gold);background:rgba(196,154,42,0.05);}
+.row-name{font-family:'Cinzel',serif;font-weight:600;color:var(--gold-pale);font-size:1rem;margin-bottom:0.2rem;}
+.row-meta{font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.05em;color:var(--ash);text-transform:uppercase;}
+.tier-pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:0.55rem;padding:1px 6px;border-radius:2px;background:rgba(196,154,42,0.15);color:var(--gold);border:1px solid var(--gold-dim);margin-right:6px;}
+.empty{padding:2rem;text-align:center;color:var(--ash);font-style:italic;font-size:0.9rem;}
+/* DETAIL */
+.detail-tabs{display:flex;background:var(--iron-mid);border-radius:3px;padding:3px;margin-bottom:1rem;gap:2px;}
+.dtab{flex:1;font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ash);background:transparent;border:none;padding:0.5rem;cursor:pointer;border-radius:2px;transition:all 0.15s;}
+.dtab:hover{color:var(--parchment);}
+.dtab.active{background:var(--ink);color:var(--gold);}
+.file-content{background:var(--ink);border:1px solid var(--iron-light);border-radius:3px;padding:1.25rem 1.5rem;font-family:'JetBrains Mono',monospace;font-size:0.82rem;line-height:1.65;color:var(--parchment-dark);white-space:pre-wrap;overflow-x:auto;max-height:65vh;overflow-y:auto;}
+.dview{display:none;}.dview.active{display:block;}
+/* ACTIONS */
+.actions-card{background:var(--ink);border:1px solid var(--iron-light);border-radius:3px;padding:1.5rem;margin-top:1rem;}
+.action-tabs{display:flex;gap:0;margin-bottom:1rem;border-bottom:1px solid var(--iron-light);}
+.atab{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ash);background:transparent;border:none;border-bottom:2px solid transparent;padding:0.65rem 1rem;cursor:pointer;}
+.atab:hover{color:var(--parchment);}
+.atab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.aview{display:none;padding-top:0.5rem;}.aview.active{display:block;}
+.checklist{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem 1rem;margin-bottom:1rem;}
+.checklist label{display:flex;align-items:flex-start;gap:0.5rem;padding:0.4rem 0.5rem;background:var(--iron-mid);border:1px solid var(--iron-light);border-radius:2px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0;text-transform:none;color:var(--ash-light);margin-bottom:0;line-height:1.4;}
+.checklist label:hover{border-color:var(--gold-dim);}
+.checklist input[type=checkbox]{width:auto;margin:0.15rem 0 0 0;flex-shrink:0;accent-color:var(--blood-pale);}
+.checklist .code{color:var(--blood-pale);font-weight:500;margin-right:4px;}
+.cat-h{font-family:'Cinzel',serif;font-size:0.7rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-dim);margin:1rem 0 0.5rem;grid-column:1/-1;padding-bottom:0.3rem;border-bottom:1px solid var(--iron-light);}
+.log{background:var(--iron-mid);border-left:3px solid var(--gold);border-radius:0 3px 3px 0;padding:0.85rem 1.25rem;margin-top:1rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.7;color:var(--ash-light);white-space:pre-wrap;}
+.log.ok{border-color:var(--green);}
+.log.err{border-color:var(--blood);color:var(--blood-pale);}
+/* SHEET TABLE */
+.sheet-table{width:100%;border-collapse:collapse;background:var(--ink);border:1px solid var(--iron-light);font-size:0.85rem;}
+.sheet-table th{background:var(--iron-mid);font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);padding:0.6rem 0.75rem;text-align:left;border-bottom:1px solid var(--iron-light);}
+.sheet-table td{padding:0.55rem 0.75rem;border-bottom:1px solid var(--iron-light);color:var(--parchment-dark);vertical-align:top;}
+.sheet-table tr:hover td{background:rgba(196,154,42,0.04);}
+.sheet-table .small{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--ash);}
+.status-pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:0.55rem;padding:2px 7px;border-radius:2px;text-transform:uppercase;letter-spacing:0.05em;}
+.status-New{background:rgba(196,154,42,0.15);color:var(--gold);border:1px solid var(--gold-dim);}
+.status-Approved{background:rgba(122,184,120,0.15);color:var(--green);border:1px solid var(--green-dim);}
+.status-Returned{background:rgba(122,31,31,0.2);color:var(--blood-pale);border:1px solid var(--blood);}
+.status-UnderReview{background:rgba(196,148,58,0.15);color:var(--warn);border:1px solid var(--warn);}
+.status-Priority{background:rgba(122,31,31,0.25);color:var(--blood-pale);border:1px solid var(--blood);}
+.hint{font-size:0.78rem;color:var(--ash);font-style:italic;line-height:1.5;}
+.toolbar{display:flex;gap:0.5rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap;}
+footer{border-top:1px solid var(--iron-light);padding:1rem 2rem;font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;color:var(--ash);text-transform:uppercase;text-align:center;margin-top:2rem;}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-eye">Ironthorn — Lead Writer Board</div>
+  <h1 class="hdr-title">Manager <span>Review</span></h1>
+  <p class="hdr-sub">Pending submissions, sheet history, approval and return.</p>
+  <div class="hdr-stats">
+    <div class="hdr-stat"><div class="hdr-stat-val" id="stat-pending">—</div><div class="hdr-stat-lab">Pending</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-val" id="stat-intake">—</div><div class="hdr-stat-lab">In Intake</div></div>
+    <div class="hdr-stat"><div class="hdr-stat-val" id="stat-sheet">—</div><div class="hdr-stat-lab">Sheet rows</div></div>
+    <div class="hdr-status"><span class="dot" id="status-dot"></span><span id="status-text">Connecting…</span></div>
+  </div>
+</header>
+
+<div class="tabs" id="tabs" style="display:none;">
+  <button class="tab active" data-panel="pending">Pending Review<span class="tab-count" id="tc-pending">0</span></button>
+  <button class="tab" data-panel="intake">Intake Queue<span class="tab-count" id="tc-intake">0</span></button>
+  <button class="tab" data-panel="sheet">Sheet History<span class="tab-count" id="tc-sheet">0</span></button>
+  <button class="tab" data-panel="settings">Settings</button>
+</div>
+
+<main>
+
+<!-- LOGIN -->
+<div class="panel active" id="panel-login">
+  <div class="login-wrap">
+    <div class="card">
+      <div class="card-title">Manager access</div>
+      <div class="field">
+        <label>Shared password</label>
+        <input type="password" id="login-pw" placeholder="From manager_config.json" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-err" style="color:var(--blood-pale);font-size:0.8rem;margin-bottom:1rem;min-height:1rem;"></div>
+      <button class="btn-primary" onclick="doLogin()" style="width:100%;">Continue →</button>
+      <p class="hint" style="margin-top:1rem;">First-run setup: copy <code>manager_config.example.json</code> to <code>manager_config.json</code> in the Tools/ folder, set the shared password, manager email, and SMTP app password.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING -->
+<div class="panel" id="panel-pending">
+  <div class="toolbar">
+    <button class="btn-secondary" onclick="loadPending()">Refresh</button>
+    <span class="hint" id="pending-info"></span>
+  </div>
+  <div class="layout">
+    <div class="list-col" id="pending-list"></div>
+    <div id="pending-detail">
+      <div class="empty">Select a submission to begin review.</div>
+    </div>
+  </div>
+</div>
+
+<!-- INTAKE -->
+<div class="panel" id="panel-intake">
+  <div class="toolbar">
+    <button class="btn-secondary" onclick="loadIntake()">Refresh</button>
+    <span class="hint" id="intake-info">Files in <code>NPCs/_Pending/_Intake/</code> awaiting the watcher.</span>
+  </div>
+  <div id="intake-list"></div>
+</div>
+
+<!-- SHEET -->
+<div class="panel" id="panel-sheet">
+  <div class="toolbar">
+    <button class="btn-secondary" onclick="loadSheet()">Refresh</button>
+    <span class="hint" id="sheet-info"></span>
+  </div>
+  <div id="sheet-table-wrap"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="panel" id="panel-settings">
+  <div class="card">
+    <div class="card-title">Server status</div>
+    <div id="settings-status" style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;line-height:2;color:var(--ash-light);"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Manager identity</div>
+    <div class="field">
+      <label>Your name (used in approval / return records)</label>
+      <input type="text" id="manager-name" placeholder="e.g. Stephen Brent Jenkins">
+    </div>
+    <p class="hint">Stored in this browser only. Used as the manager signature on records and emails.</p>
+  </div>
+</div>
+
+</main>
+
+<footer>Ironthorn Manager Board v1.0 · Local server on port 7843</footer>
+
+<script>
+// Return taxonomy — pulled directly from _System/NPC-Return-Taxonomy.md
+var RETURN_CODES = {
+  'Tone': [
+    ['TONE-01','NPC defined by suffering'],
+    ['TONE-02','NPC monologues inner state in dialogue'],
+    ['TONE-03','NPC performs emotion rather than suppresses'],
+    ['TONE-04','Most dramatic line reads as a speech'],
+    ['TONE-05','Arc accelerated through dialogue without mechanical support'],
+  ],
+  'Tells': [
+    ['TELL-01','Surface tell missing'],
+    ['TELL-02','Mid tell missing'],
+    ['TELL-03','Deep tell missing'],
+    ['TELL-04','Surface tell not active in normal scenes'],
+    ['TELL-05','Deep tell does not fire on lie-catch'],
+    ['TELL-06','Tell not writable as stage direction'],
+    ['TELL-07','Tell fires where suppression score blocks it'],
+    ['TELL-08','Tell inconsistent between scenes'],
+    ['TELL-09','Multiple tells for same emotional state'],
+    ['TELL-10','Tell named explicitly in dialogue'],
+  ],
+  'Flags': [
+    ['FLAG-01','liar_mark_active true without trigger'],
+    ['FLAG-02','debt_flag_active true without leverage_held'],
+    ['FLAG-03','leverage_held true without debt_flag_active'],
+    ['FLAG-04','faction_alert_sent true at submission'],
+    ['FLAG-05','trust_score >5 without justification'],
+    ['FLAG-06','trust_score <4 without justification'],
+    ['FLAG-07','secrets_known populated without explanation'],
+    ['FLAG-08','Boolean flag has non-boolean value'],
+  ],
+  'Voice': [
+    ['VOICE-01','Dialogue does not match Layer 1 voice'],
+    ['VOICE-02','NPC more eloquent under pressure'],
+    ['VOICE-03','No silence written as stage direction'],
+    ['VOICE-04','Test dialogue lines appear in submitted file'],
+    ['VOICE-05','Vocabulary exceeds background constraints'],
+  ],
+  'Decision Map (Tier 3+)': [
+    ['DM-01','Decision map missing'],
+    ['DM-02','In-world response line is generic'],
+    ['DM-03','Step 3 does not match true alignment'],
+    ['DM-04','Step 4 does not match Cunning score'],
+    ['DM-05','Step 5 incorrect or missing'],
+  ],
+  'Incomplete submission': [
+    ['INCOMPLETE-01','NPC file missing'],
+    ['INCOMPLETE-02','Submission form missing'],
+    ['INCOMPLETE-03','Intake document missing'],
+    ['INCOMPLETE-04','Quiz score absent or below 80%'],
+    ['INCOMPLETE-05','Form contains placeholder text'],
+    ['INCOMPLETE-06','NPC file contains placeholder text'],
+  ],
+};
+
+// State
+var session = null;
+var selectedNpc = null;
+var detailFiles = {};
+var sheetRowsCache = [];
+
+// ─── AUTH ─────────────────────────────────────────────────────
+function api(path, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  if (session) opts.headers['X-Session'] = session;
+  if (opts.body && typeof opts.body !== 'string') {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(opts.body);
+  }
+  return fetch(path, opts).then(function(r){ return r.json().then(function(d){return {status:r.status, data:d};}); });
+}
+
+function doLogin() {
+  var pw = document.getElementById('login-pw').value;
+  var err = document.getElementById('login-err');
+  err.textContent = '';
+  api('/api/auth', { method: 'POST', body: { password: pw } }).then(function(res){
+    if (res.data && res.data.success) {
+      session = res.data.session;
+      localStorage.setItem('mgr_session', session);
+      // Pre-fill manager name from config email if not yet set
+      var existing = localStorage.getItem('mgr_name');
+      if (!existing && res.data.manager_email) {
+        document.getElementById('manager-name').value = res.data.manager_email;
+      } else if (existing) {
+        document.getElementById('manager-name').value = existing;
+      }
+      enterApp();
+    } else {
+      err.textContent = (res.data && res.data.error) || 'Auth failed.';
+    }
+  }).catch(function(e){ err.textContent = 'Connection error: ' + e.message; });
+}
+
+function enterApp() {
+  document.getElementById('panel-login').classList.remove('active');
+  document.getElementById('tabs').style.display = 'flex';
+  switchPanel('pending');
+  loadAll();
+}
+
+// ─── TABS ─────────────────────────────────────────────────────
+document.getElementById('tabs').addEventListener('click', function(e){
+  if (e.target.classList.contains('tab')) {
+    switchPanel(e.target.dataset.panel);
+  }
+});
+function switchPanel(name) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active', t.dataset.panel === name); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name === 'pending') loadPending();
+  if (name === 'intake')  loadIntake();
+  if (name === 'sheet')   loadSheet();
+  if (name === 'settings') loadSettings();
+}
+
+// ─── PING / STATUS ────────────────────────────────────────────
+function pingStatus() {
+  api('/api/ping').then(function(res){
+    var dot = document.getElementById('status-dot');
+    var txt = document.getElementById('status-text');
+    if (res.status === 200 && res.data.status === 'ok') {
+      dot.classList.remove('off');
+      txt.textContent = 'Vault connected';
+    } else {
+      dot.classList.add('off');
+      txt.textContent = 'Server error';
+    }
+  }).catch(function(){
+    document.getElementById('status-dot').classList.add('off');
+    document.getElementById('status-text').textContent = 'Server offline';
+  });
+}
+
+// ─── LOAD ALL ─────────────────────────────────────────────────
+function loadAll() { loadPending(); loadIntake(); loadSheet(); }
+
+// ─── PENDING ──────────────────────────────────────────────────
+function loadPending() {
+  api('/api/pending').then(function(res){
+    if (res.status !== 200) return;
+    var list = res.data.submissions || [];
+    document.getElementById('stat-pending').textContent = list.length;
+    document.getElementById('tc-pending').textContent = list.length;
+    var html = '';
+    if (list.length === 0) {
+      html = '<div class="empty">No pending submissions. The intake watcher creates folders here as it processes intake files.</div>';
+    } else {
+      list.forEach(function(s){
+        var sel = (s.npc_name === selectedNpc) ? ' selected' : '';
+        html += '<div class="row' + sel + '" onclick="selectPending(\'' + s.npc_name + '\')">' +
+          '<div class="row-name">' + s.npc_name.replace(/-/g,' ') + '</div>' +
+          '<div class="row-meta">' +
+            (s.tier ? '<span class="tier-pill">T' + s.tier + '</span>' : '') +
+            (s.faction ? s.faction + ' · ' : '') +
+            (s.writer || 'unknown writer') +
+            (s.submitted_date ? ' · ' + s.submitted_date : '') +
+          '</div>' +
+          '<div class="row-meta" style="margin-top:0.3rem;">' + (s.files || []).length + ' file(s)</div>' +
+        '</div>';
+      });
+    }
+    document.getElementById('pending-list').innerHTML = html;
+    document.getElementById('pending-info').textContent = list.length + ' submission(s) awaiting review.';
+  });
+}
+
+function selectPending(npcName) {
+  selectedNpc = npcName;
+  document.querySelectorAll('#pending-list .row').forEach(function(r){
+    r.classList.toggle('selected', r.querySelector('.row-name').textContent === npcName.replace(/-/g,' '));
+  });
+  api('/api/submission?name=' + encodeURIComponent(npcName)).then(function(res){
+    if (res.status !== 200) {
+      document.getElementById('pending-detail').innerHTML = '<div class="empty">Could not load submission.</div>';
+      return;
+    }
+    detailFiles = res.data.files || {};
+    renderDetail(npcName);
+  });
+}
+
+function renderDetail(npcName) {
+  var fileNames = Object.keys(detailFiles);
+  if (fileNames.length === 0) {
+    document.getElementById('pending-detail').innerHTML = '<div class="empty">No files in this submission folder.</div>';
+    return;
+  }
+  // Order: NPC file, then form, then intake, then anything else
+  fileNames.sort(function(a,b){
+    var prio = function(n){
+      if (n === npcName + '.md') return 0;
+      if (n.indexOf('Submission-Form') >= 0) return 1;
+      if (n.indexOf('Submission-Intake') >= 0) return 2;
+      if (n.indexOf('Origin-Story') >= 0) return 3;
+      return 4;
+    };
+    return prio(a) - prio(b);
+  });
+
+  var tabsHtml = '<div class="detail-tabs">';
+  fileNames.forEach(function(fn, i){
+    var label = fn.replace(npcName + '_','').replace(npcName,'NPC').replace('.md','').replace(/-/g,' ');
+    tabsHtml += '<button class="dtab' + (i===0?' active':'') + '" onclick="showDFile(\'' + fn + '\')">' + label + '</button>';
+  });
+  tabsHtml += '</div>';
+
+  var viewsHtml = '';
+  fileNames.forEach(function(fn, i){
+    viewsHtml += '<div class="dview' + (i===0?' active':'') + '" id="dv-' + cssId(fn) + '">' +
+      '<div class="file-content">' + escapeHtml(detailFiles[fn]) + '</div></div>';
+  });
+
+  var actionsHtml = '<div class="actions-card">' +
+    '<div class="action-tabs">' +
+      '<button class="atab active" onclick="showAView(\'approve\')">Approve</button>' +
+      '<button class="atab" onclick="showAView(\'return\')">Return for revision</button>' +
+    '</div>' +
+    '<div class="aview active" id="av-approve">' +
+      '<p class="hint" style="margin-bottom:1rem;">Moves the NPC file from <code>_Pending/' + npcName + '/</code> into <code>NPCs/</code>, archives the submission form to <code>_Characters/' + npcName + '/Submissions/</code>, snapshots any prior canonical version, writes an approval record, and emails the writer.</p>' +
+      '<label style="display:flex;align-items:center;gap:0.5rem;font-family:Crimson Pro,serif;text-transform:none;letter-spacing:0;color:var(--parchment);font-size:0.95rem;margin-bottom:1rem;">' +
+        '<input type="checkbox" id="approve-email" checked style="width:auto;"> Send approval email to the writer' +
+      '</label>' +
+      '<button class="btn-primary btn-approve" onclick="doApprove()">Approve and move to vault →</button>' +
+      '<div id="approve-log"></div>' +
+    '</div>' +
+    '<div class="aview" id="av-return">' +
+      '<p class="hint" style="margin-bottom:0.75rem;">Select all return codes that apply. The writer receives an email listing every code with the official "what to fix" guidance from the return taxonomy, plus your specific notes.</p>' +
+      '<div class="checklist" id="return-checklist">' + buildChecklist() + '</div>' +
+      '<div class="field">' +
+        '<label>Specific notes (line references, what to change)</label>' +
+        '<textarea id="return-notes" rows="6" placeholder="TELL-06 — Mid tell (Layer T2)\nCurrent: She seems suspicious of the player\nThis is an emotion label, not an observable action. Rewrite as something a director could give to an actor."></textarea>' +
+      '</div>' +
+      '<label style="display:flex;align-items:center;gap:0.5rem;font-family:Crimson Pro,serif;text-transform:none;letter-spacing:0;color:var(--parchment);font-size:0.95rem;margin-bottom:1rem;">' +
+        '<input type="checkbox" id="return-email" checked style="width:auto;"> Send return email to the writer' +
+      '</label>' +
+      '<button class="btn-primary btn-return" onclick="doReturn()">Return for revision</button>' +
+      '<div id="return-log"></div>' +
+    '</div>' +
+  '</div>';
+
+  document.getElementById('pending-detail').innerHTML = tabsHtml + viewsHtml + actionsHtml;
+}
+
+function showDFile(fn) {
+  document.querySelectorAll('#pending-detail .dtab').forEach(function(t,i){
+    var fileNames = Object.keys(detailFiles);
+    t.classList.remove('active');
+  });
+  // Re-tab via index match
+  var btns = document.querySelectorAll('#pending-detail .dtab');
+  btns.forEach(function(b){
+    if (b.getAttribute('onclick').indexOf("'"+fn+"'") >= 0) b.classList.add('active');
+  });
+  document.querySelectorAll('#pending-detail .dview').forEach(function(v){ v.classList.remove('active'); });
+  var el = document.getElementById('dv-' + cssId(fn));
+  if (el) el.classList.add('active');
+}
+
+function showAView(name) {
+  document.querySelectorAll('#pending-detail .atab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('#pending-detail .aview').forEach(function(v){ v.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('av-'+name).classList.add('active');
+}
+
+function buildChecklist() {
+  var html = '';
+  Object.keys(RETURN_CODES).forEach(function(cat){
+    html += '<div class="cat-h">' + cat + '</div>';
+    RETURN_CODES[cat].forEach(function(c){
+      html += '<label><input type="checkbox" value="' + c[0] + ' — ' + c[1] + '">' +
+        '<span><span class="code">' + c[0] + '</span>' + c[1] + '</span></label>';
+    });
+  });
+  return html;
+}
+
+// ─── APPROVE / RETURN ─────────────────────────────────────────
+function getManagerName() {
+  var n = document.getElementById('manager-name').value.trim();
+  if (n) localStorage.setItem('mgr_name', n);
+  return n || 'Lead Writer';
+}
+
+function doApprove() {
+  if (!selectedNpc) return;
+  if (!confirm('Approve ' + selectedNpc + '? This will move files into the vault and email the writer.')) return;
+  var send = document.getElementById('approve-email').checked;
+  var logEl = document.getElementById('approve-log');
+  logEl.className = 'log';
+  logEl.textContent = 'Working…';
+  api('/api/approve', { method:'POST', body: {
+    npc_name: selectedNpc,
+    manager_name: getManagerName(),
+    send_email: send
+  }}).then(function(res){
+    if (res.data && res.data.success) {
+      logEl.className = 'log ok';
+      logEl.textContent = res.data.log.join('\n');
+      // Pending list will refresh and the NPC will be gone
+      setTimeout(function(){ loadPending(); selectedNpc = null; }, 1500);
+    } else {
+      logEl.className = 'log err';
+      logEl.textContent = (res.data.log || []).join('\n') || (res.data.error || 'Unknown error');
+    }
+  });
+}
+
+function doReturn() {
+  if (!selectedNpc) return;
+  var codes = [];
+  document.querySelectorAll('#return-checklist input[type=checkbox]:checked').forEach(function(cb){
+    codes.push(cb.value);
+  });
+  var notes = document.getElementById('return-notes').value.trim();
+  if (codes.length === 0 && !notes) {
+    if (!confirm('No return codes or notes selected. Return anyway?')) return;
+  }
+  var send = document.getElementById('return-email').checked;
+  var logEl = document.getElementById('return-log');
+  logEl.className = 'log';
+  logEl.textContent = 'Working…';
+  api('/api/return', { method:'POST', body: {
+    npc_name: selectedNpc,
+    codes: codes,
+    notes: notes,
+    manager_name: getManagerName(),
+    send_email: send
+  }}).then(function(res){
+    if (res.data && res.data.success) {
+      logEl.className = 'log ok';
+      logEl.textContent = res.data.log.join('\n');
+    } else {
+      logEl.className = 'log err';
+      logEl.textContent = (res.data.log || []).join('\n') || (res.data.error || 'Unknown error');
+    }
+  });
+}
+
+// ─── INTAKE ───────────────────────────────────────────────────
+function loadIntake() {
+  api('/api/intake').then(function(res){
+    if (res.status !== 200) return;
+    var files = res.data.files || [];
+    document.getElementById('stat-intake').textContent = files.length;
+    document.getElementById('tc-intake').textContent = files.length;
+    if (files.length === 0) {
+      document.getElementById('intake-list').innerHTML =
+        '<div class="empty">No files in <code>_Intake/</code> right now. Files dropped here are picked up by the intake watcher within ~5 seconds.</div>';
+      return;
+    }
+    var html = '';
+    files.forEach(function(f){
+      html += '<div class="row" style="cursor:default;">' +
+        '<div class="row-name" style="font-family:JetBrains Mono,monospace;font-size:0.85rem;font-weight:500;">' + f.filename + '</div>' +
+        '<div class="row-meta">' + Math.round(f.size/100)/10 + ' KB · modified ' + f.modified.split('T')[0] + '</div>' +
+      '</div>';
+    });
+    document.getElementById('intake-list').innerHTML = html;
+  });
+}
+
+// ─── SHEET ────────────────────────────────────────────────────
+function loadSheet() {
+  api('/api/sheet').then(function(res){
+    if (res.status !== 200) {
+      document.getElementById('sheet-table-wrap').innerHTML =
+        '<div class="empty">Could not load sheet rows.</div>';
+      return;
+    }
+    var rows = res.data.rows || [];
+    sheetRowsCache = rows;
+    document.getElementById('stat-sheet').textContent = rows.length;
+    document.getElementById('tc-sheet').textContent = rows.length;
+
+    if (rows.length === 0) {
+      document.getElementById('sheet-table-wrap').innerHTML =
+        '<div class="empty">No rows from sheet, or <code>sheet_csv_url</code> not configured in <code>manager_config.json</code>.<br><br>' +
+        'To enable: in Google Sheets, <strong>File → Share → Publish to web</strong>, choose the Submissions sheet and CSV format, then paste the URL into the config file.</div>';
+      return;
+    }
+
+    var html = '<table class="sheet-table"><thead><tr>' +
+      '<th>NPC</th><th>Tier</th><th>Writer</th><th>Status</th><th>Submitted</th><th></th>' +
+    '</tr></thead><tbody>';
+    rows.forEach(function(r){
+      var status = (r['Status'] || 'New').replace(/\s+/g,'');
+      html += '<tr>' +
+        '<td><strong>' + (r['NPC Name']||'—') + '</strong>' +
+          (r['Faction'] ? '<div class="small">' + r['Faction'] + (r['District'] ? ' · ' + r['District'] : '') + '</div>' : '') +
+        '</td>' +
+        '<td>' + (r['NPC Tier']||'—') + '</td>' +
+        '<td>' + (r['Writer Name']||'—') +
+          (r['Writer Email'] ? '<div class="small">' + r['Writer Email'] + '</div>' : '') +
+        '</td>' +
+        '<td><span class="status-pill status-' + status + '">' + (r['Status']||'New') + '</span></td>' +
+        '<td class="small">' + ((r['Timestamp']||'').split('T')[0] || '—') + '</td>' +
+        '<td><button class="btn-secondary" onclick="importRow(' + r._row_index + ')">Import to _Intake/</button></td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('sheet-table-wrap').innerHTML = html;
+    document.getElementById('sheet-info').textContent = rows.length + ' rows. Most recent first.';
+  });
+}
+
+function importRow(rowIndex) {
+  if (!confirm('Drop this row into _Intake/ for the watcher to process? (Only do this if the watcher hasn\'t processed it yet.)')) return;
+  api('/api/import-row', { method:'POST', body: { row_index: rowIndex } }).then(function(res){
+    alert(res.data.message || (res.data.success ? 'Done' : 'Failed'));
+    loadIntake();
+  });
+}
+
+// ─── SETTINGS ─────────────────────────────────────────────────
+function loadSettings() {
+  api('/api/ping').then(function(res){
+    if (res.status !== 200) return;
+    var d = res.data;
+    document.getElementById('settings-status').innerHTML =
+      'Vault path: <span style="color:var(--gold-pale);">' + d.vault + '</span><br>' +
+      'Config loaded: <span style="color:' + (d.config_loaded ? 'var(--green)' : 'var(--blood-pale)') + ';">' + d.config_loaded + '</span><br>' +
+      'Sheet configured: <span style="color:' + (d.sheet_configured ? 'var(--green)' : 'var(--ash)') + ';">' + d.sheet_configured + '</span><br>' +
+      'Server time: <span style="color:var(--ash-light);">' + d.time + '</span>';
+  });
+  // Populate manager name from local storage
+  var existing = localStorage.getItem('mgr_name');
+  if (existing) document.getElementById('manager-name').value = existing;
+}
+
+document.getElementById('manager-name').addEventListener('blur', function(){
+  localStorage.setItem('mgr_name', this.value.trim());
+});
+
+// ─── UTILS ────────────────────────────────────────────────────
+function escapeHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function cssId(s) {
+  return s.replace(/[^A-Za-z0-9]/g,'_');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function(){
+  pingStatus();
+  setInterval(pingStatus, 15000);
+  // Try to resume session
+  var saved = localStorage.getItem('mgr_session');
+  if (saved) {
+    session = saved;
+    // Validate by trying a protected endpoint
+    api('/api/pending').then(function(res){
+      if (res.status === 200) enterApp();
+      else { session = null; localStorage.removeItem('mgr_session'); }
+    });
+  }
+});
+</script>
+</body>
+</html>
