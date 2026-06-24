@@ -8,5 +8,7 @@
   "blueprint-renderer",
   "obsidian-kanban",
   "calendar",
-  "obsidian-outliner"
+  "obsidian-outliner",
+  "obsidian-tts",
+  "obsidian-git"
 ]
