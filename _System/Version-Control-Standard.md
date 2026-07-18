@@ -54,12 +54,22 @@ Version numbers are read from the file's frontmatter `version:` field. If no ver
 ## The automation script
 
 **Location:** `GameVault/Tools/version_snapshot.py`
+**Launcher:** `GameVault/Tools/snapshot.bat`
 
 **Usage:**
 ```
-python version_snapshot.py path\to\file.md
-python version_snapshot.py path\to\script.py
+# From PowerShell, in the Tools/ directory:
+.\snapshot.bat "path\to\file.md"
+.\snapshot.bat "path\to\script.py"
+
+# Or drag the file onto snapshot.bat in Explorer.
 ```
+
+> [!note] Why the bat wrapper
+> The Python script lives at `version_snapshot.py` but should not be invoked
+> directly. `snapshot.bat` hard-codes the Claude Desktop bundled Python path,
+> which is the only Python available on this machine. The bat file is the
+> supported entry point.
 
 **What it does:**
 1. Reads the file's current version from frontmatter (or defaults to v1.0)

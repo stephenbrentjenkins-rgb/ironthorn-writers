@@ -224,4 +224,4 @@ Regardless of scene requirements, faction, alignment, or player state, these thi
 
 ---
 
-*[[README|Back to Index]] · [[NPC-Intelligence-System]] · [[Deception-Perception-Skills]] · [[Alignment-Spectrum]] · [[Attribute-Reference]] · [[NPC-Tier-Reference]]*
+*[[README|Back to Index]] · [[NPC-Intelligence-System]] · [[Deception-Perception-Skills]] · [[Alignment-Spectrum]] · [[Drives|Drives System]] · [[Drives-Reference]] · [[NPC-Tier-Reference]]*

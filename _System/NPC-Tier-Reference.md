@@ -36,11 +36,11 @@ Five tiers. One template that scales. The tier you assign determines which secti
 
 ## Tier 2 — Supporting
 
-**Fill:** Quick Profile + Layer 1 Identity + Main Attributes (no subs) + one goal + basic lie response.
+**Fill:** Quick Profile + Layer 1 Identity + Main Drives (no sub-Drives) + one goal + basic lie response.
 
 **What they do:** Provide quests, information, or services that matter to the player across multiple scenes. The player will see them more than once and should feel continuity.
 
-**Lie response at Tier 2:** Connects to their main attributes — a high Cunning NPC at Tier 2 responds differently than a low one, even without sub-attributes. The response is still simple but character-specific.
+**Lie response at Tier 2:** Connects to their main Drives — a high Cunning NPC at Tier 2 responds differently than a low one, even without sub-Drives. The response is still simple but character-specific.
 
 **Key distinction from Tier 1:** The player can form a rudimentary relationship with a Tier 2 NPC. They have a history and a want. That's enough.
 
@@ -48,13 +48,13 @@ Five tiers. One template that scales. The tier you assign determines which secti
 
 ## Tier 3 — Named
 
-**Fill:** Everything in Tier 2 + Sub-Attributes + two goals (primary and secondary) + full Decision Map + Memory Log header.
+**Fill:** Everything in Tier 2 + Sub-Drives + two goals (primary and secondary) + full Decision Map + Memory Log header.
 
 **What they do:** Drive or complicate plot arcs. The player should remember their name. They have opinions about the player that shift based on player behaviour.
 
-**Lie response at Tier 3:** Full Decision Map applies. Their sub-attributes produce specific, documented behaviour when they catch a lie. The memory log starts recording.
+**Lie response at Tier 3:** Full Decision Map applies. Their sub-Drives produce specific, documented behaviour when they catch a lie. The memory log starts recording.
 
-**Key distinction from Tier 2:** They have a decision map and sub-attributes. The same lie told to two Tier 3 NPCs produces different responses because their subs are different.
+**Key distinction from Tier 2:** They have a decision map and sub-Drives. The same lie told to two Tier 3 NPCs produces different responses because their sub-Drives are different.
 
 ---
 
@@ -105,4 +105,4 @@ SORT npc_tier DESC, cunning DESC
 
 ---
 
-*[[README|Back to Index]] · [[NPC-Intelligence-System]] · [[Attribute-Reference]]*
+*[[README|Back to Index]] · [[NPC-Intelligence-System]] · [[Drives|Drives System]] · [[Drives-Reference]] · [[Skill-Growth]]*

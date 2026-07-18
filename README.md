@@ -32,13 +32,16 @@
 1. [[_System/Alignment-Spectrum]] — the 7-tier light/gray/dark system
 2. [[_System/Deception-Perception-Skills]] — how lying and catching lies works
 3. [[_System/NPC-Intelligence-System]] — decision maps, memory logs, goal architecture
-4. [[_System/Attribute-Reference]] — main attributes and all sub-attributes explained
-5. [[_System/NPC-Tier-Reference]] — when to use Tier 1 vs Tier 5
-6. [[_System/Spy-Registry]] — all active double-agent operations; designer-only
-7. [[_System/Writer-Standards]] — mandatory read before writing any NPC file or scene
-8. [[_System/Lead-Writer-Review-Workflow]] — how submissions are reviewed and admitted
-9. [[_System/NPC-Return-Taxonomy]] — standardised return codes for all submission failures
-10. [[_System/Version-Control-Standard]] — versioning rules and automation tools
+4. [[_System/Drives]] — the behavioral simulation system (Cunning, Loyalty, Fear, Greed, Idealism)
+5. [[_System/Drives-Reference]] — full per-Drive definitions and sub-Drives
+6. [[_System/Attribute-Reference]] — *reserved* for capability attributes (Str/Dex/Con/Wis/Int/Cha); not yet defined
+7. [[_System/NPC-Tier-Reference]] — when to use Tier 1 vs Tier 5
+8. [[_System/Spy-Registry]] — all active double-agent operations; designer-only
+9. [[_System/Writer-Standards]] — mandatory read before writing any NPC file or scene
+10. [[_System/Lead-Writer-Review-Workflow]] — how submissions are reviewed and admitted
+11. [[_System/NPC-Return-Taxonomy]] — standardised return codes for all submission failures
+12. [[_System/Version-Control-Standard]] — versioning rules and automation tools
+13. [[_System/Skill-Growth]] — how Deception and Perception ranks rise over play; tuning surface for the growth mechanic
 
 ---
 
@@ -182,7 +185,7 @@ SORT faction_tier DESC
 |---------|---------------|
 | Session 1 | Alignment spectrum, deception/perception skill system |
 | Session 2 | NPC intelligence system — decision map, memory log, goal architecture |
-| Session 3 | Attribute system — mains and subs |
+| Session 3 | Drives system (originally mis-labeled "Attributes") — mains and subs |
 | Session 4 | NPC template v3.0 — scaled Tier 1–5 |
 | Session 5 | Seed NPCs — Maren Voss, Brother Aldric, Commander Syla |
 | Session 6 | Full vault structure built and imported to Obsidian |
@@ -201,4 +204,4 @@ SORT faction_tier DESC
 
 ---
 
-*Vault version 2.1 · Template v3.0 · Engine: Unreal 5.5*
+*Vault version 2.2 · Template v3.0 · Engine: Unreal 5.5*

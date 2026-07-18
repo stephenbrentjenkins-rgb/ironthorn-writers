@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Explorer{% endblock %}
+{% block content %}
+
+<section class="wb-panel">
+  <h1>Magic System Explorer</h1>
+  <p class="wb-lede">
+    Navigable reference for the seven named traditions. Read-only.
+    Reads <code>_System/Magic.md</code> as canonical; this view is
+    designed to be faster than scrolling the doc.
+  </p>
+</section>
+
+<section class="wb-panel wb-panel-placeholder">
+  <h2>Coming in v0.3</h2>
+  <p>
+    The full Explorer lands in commit 3. Here is the shape it will take:
+  </p>
+  <ul>
+    <li>Tradition cards (Holy, Unholy, Nature, Elemental, Mental, Time)</li>
+    <li>Click a tradition → faction, preferred channel, corruption profile, sub-traditions, aesthetic notes</li>
+    <li>Filter by faction; see all traditions owned</li>
+    <li>The 2×2 sanctioned-vs-unsanctioned × holy-vs-unholy grid as an interactive diagram</li>
+    <li>Cross-links back to the canonical <code>_System/Magic.md</code> with Obsidian deep-links</li>
+  </ul>
+</section>
+
+<section class="wb-panel">
+  <h3>Traditions (placeholder list)</h3>
+  <ul class="wb-tradition-list">
+    {% for t in traditions %}
+      <li><strong>{{ t }}</strong></li>
+    {% endfor %}
+  </ul>
+</section>
+
+{% endblock %}

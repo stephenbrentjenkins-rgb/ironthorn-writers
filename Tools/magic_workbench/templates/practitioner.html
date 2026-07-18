@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% block title %}Practitioner Builder{% endblock %}
+{% block content %}
+
+<section class="wb-panel">
+  <h1>Practitioner Builder</h1>
+  <p class="wb-lede">
+    Author a magic-practicing NPC. Live validation against the tradition /
+    faction-credential matrix; submission writes to
+    <code>NPCs/_Pending/&lt;slug&gt;/</code> in v3.1 template shape.
+  </p>
+</section>
+
+<div class="wb-builder-grid">
+
+  <!-- LEFT COLUMN — THE FORM -->
+  <form id="pb-form" class="wb-builder-form" onsubmit="return false;">
+
+    <!-- SECTION 1: IDENTITY -->
+    <section class="wb-panel">
+      <h2>1 · Identity</h2>
+
+      <div class="wb-field">
+        <label for="pb-npc-name">NPC name <span class="wb-req">*</span></label>
+        <input type="text" id="pb-npc-name" name="npc_name" placeholder="e.g. Brother Aldric" required />
+        <span class="wb-hint" id="pb-slug-hint">Slug: <code>—</code></span>
+      </div>
+
+      <div class="wb-field-row">
+        <div class="wb-field">
+          <label for="pb-npc-tier">Tier <span class="wb-req">*</span></label>
+          <select id="pb-npc-tier" name="npc_tier">
+            <option value="1">1 — Background</option>
+            <option value="2" selected>2 — Supporting</option>
+            <option value="3">3 — Named</option>
+            <option value="4">4 — Major</option>
+            <option value="5">5 — Legendary</option>
+          </select>
+        </div>
+        <div class="wb-field">
+          <label for="pb-faction">Faction <span class="wb-req">*</span></label>
+          <select id="pb-faction" name="faction">
+            <option value="">— select —</option>
+            {% for f in factions %}<option value="{{ f }}">{{ f }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-npc-role">Role / title <span class="wb-req">*</span></label>
+        <input type="text" id="pb-npc-role" name="npc_role" placeholder="e.g. Cleric; spiritual director" />
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-location">Location</label>
+        <input type="text" id="pb-location" name="location" placeholder="e.g. Ironthorn — Sanctum Ward" />
+      </div>
+
+      <div class="wb-field-row">
+        <div class="wb-field">
+          <label for="pb-alignment-public">Public alignment</label>
+          <select id="pb-alignment-public" name="alignment_public">
+            <option value="Light-V">Light-V (Radiant)</option>
+            <option value="Light-III">Light-III (Steadfast)</option>
+            <option value="Light-I">Light-I (Watchful)</option>
+            <option value="Gray" selected>Gray (Unbound)</option>
+            <option value="Dark-I">Dark-I (Shadowed)</option>
+            <option value="Dark-III">Dark-III (Corrupted)</option>
+            <option value="Dark-V">Dark-V (Void-Touched)</option>
+          </select>
+        </div>
+        <div class="wb-field">
+          <label for="pb-alignment-true">True alignment</label>
+          <select id="pb-alignment-true" name="alignment_true">
+            <option value="Light-V">Light-V (Radiant)</option>
+            <option value="Light-III">Light-III (Steadfast)</option>
+            <option value="Light-I">Light-I (Watchful)</option>
+            <option value="Gray" selected>Gray (Unbound)</option>
+            <option value="Dark-I">Dark-I (Shadowed)</option>
+            <option value="Dark-III">Dark-III (Corrupted)</option>
+            <option value="Dark-V">Dark-V (Void-Touched)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: MAGIC PRACTICE -->
+    <section class="wb-panel">
+      <h2>2 · Magic Practice</h2>
+
+      <div class="wb-field-checkbox">
+        <label>
+          <input type="checkbox" id="pb-magical-practice" name="magical_practice" checked />
+          This NPC is an active magic practitioner
+        </label>
+        <span class="wb-hint">Uncheck for a non-practitioner NPC. The form will still produce a valid file.</span>
+      </div>
+
+      <div id="pb-magic-block">
+
+        <div class="wb-field">
+          <label for="pb-tradition">Tradition <span class="wb-req">*</span></label>
+          <select id="pb-tradition" name="tradition">
+            <option value="">— select —</option>
+            {% for t in traditions %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+          </select>
+        </div>
+
+        <div class="wb-field">
+          <label for="pb-faction-credential">Faction credential <span class="wb-req">*</span></label>
+          <select id="pb-faction-credential" name="faction_credential">
+            <option value="">— select tradition first —</option>
+          </select>
+          <span class="wb-hint" id="pb-credential-hint"></span>
+        </div>
+
+        <div class="wb-field-row">
+          <div class="wb-field">
+            <label for="pb-cost-channel">Cost channel <span class="wb-req">*</span></label>
+            <select id="pb-cost-channel" name="cost_channel">
+              <option value="">— select —</option>
+              {% for c in cost_channels %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+            </select>
+            <span class="wb-hint" id="pb-channel-hint"></span>
+          </div>
+          <div class="wb-field">
+            <label for="pb-corruption-surface">Corruption surface</label>
+            <select id="pb-corruption-surface" name="corruption_surface">
+              <option value="">— not yet surfaced —</option>
+              {% for s in corruption_surfaces %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="wb-field-row">
+          <div class="wb-field">
+            <label for="pb-corruption-level">Corruption level: <span id="pb-corruption-readout">0</span> / 10</label>
+            <input type="range" id="pb-corruption-level" name="corruption_level" min="0" max="10" value="0" />
+            <span class="wb-hint" id="pb-corruption-hint">0 = clean</span>
+          </div>
+          <div class="wb-field">
+            <label for="pb-embrace-depth">Embrace depth: <span id="pb-embrace-readout">0</span> / 10</label>
+            <input type="range" id="pb-embrace-depth" name="embrace_depth" min="0" max="10" value="0" disabled />
+            <span class="wb-hint">Requires embrace flag below</span>
+          </div>
+        </div>
+
+        <div class="wb-field-checkbox">
+          <label>
+            <input type="checkbox" id="pb-embraced" name="embraced" />
+            This NPC has gone through the embrace ritual
+          </label>
+          <span class="wb-hint wb-hint-warn">Triggers designer review on submission. Irreversible.</span>
+        </div>
+
+        <div class="wb-field">
+          <label for="pb-practice-description">Practice description</label>
+          <textarea id="pb-practice-description" name="practice_description" rows="2"
+            placeholder="e.g. lights the street-lamps in the Lower Sanctum Ward at dusk"></textarea>
+        </div>
+
+        <div class="wb-field">
+          <label for="pb-channelling-style">Channelling style</label>
+          <textarea id="pb-channelling-style" name="channelling_style" rows="2"
+            placeholder="How they cast. Visible or covert. Ritual or improvisational. Personal signature."></textarea>
+        </div>
+
+        <div class="wb-field">
+          <label for="pb-cost-surfacing">Cost as it surfaces in this NPC</label>
+          <textarea id="pb-cost-surfacing" name="cost_surfacing" rows="2"
+            placeholder="Physical scars / mental gaps / how others read them."></textarea>
+        </div>
+
+        <div class="wb-field">
+          <label for="pb-corruption-arc">Corruption arc</label>
+          <textarea id="pb-corruption-arc" name="corruption_arc" rows="2"
+            placeholder="Trajectory. Where are they, and which way are they moving?"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: DRIVES -->
+    <section class="wb-panel">
+      <h2>3 · Main Drives</h2>
+      <p class="wb-hint">Score 1–10. The five Drives govern how this NPC chooses under pressure (not capability). Sub-Drives default to 5 and are tunable later in Obsidian.</p>
+
+      <div class="wb-attr-grid">
+        {% for a in ['cunning', 'loyalty', 'fear', 'greed', 'idealism'] %}
+        <div class="wb-attr-card">
+          <label for="pb-{{ a }}">{{ a|capitalize }}: <span class="wb-attr-readout" id="pb-{{ a }}-readout">5</span></label>
+          <input type="range" id="pb-{{ a }}" name="{{ a }}" min="1" max="10" value="5" />
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-perception">Perception threshold: <span id="pb-perception-readout">5</span></label>
+        <input type="range" id="pb-perception" name="perception_threshold" min="1" max="10" value="5" />
+        <span class="wb-hint">What makes them easy or hard to fool.</span>
+      </div>
+    </section>
+
+    <!-- SECTION 4: IDENTITY DETAIL -->
+    <section class="wb-panel">
+      <h2>4 · Identity Detail</h2>
+      <p class="wb-hint">T1 quick profile and T2 layer 1 content. Tier 3+ goals/decisions land in Obsidian.</p>
+
+      <div class="wb-field">
+        <label for="pb-function-in-world">Function in the world</label>
+        <input type="text" id="pb-function-in-world" name="function_in_world"
+          placeholder="One sentence. What they do. Why the player encounters them." />
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-first-impression">First impression</label>
+        <textarea id="pb-first-impression" name="first_impression" rows="2"
+          placeholder="Two sentences. What the player sees and feels on first contact. Surface only."></textarea>
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-signature-line">Signature line</label>
+        <input type="text" id="pb-signature-line" name="signature_line"
+          placeholder="The one line or action that defines this NPC instantly." />
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-basic-lie-response">Basic lie response</label>
+        <input type="text" id="pb-basic-lie-response" name="basic_lie_response"
+          placeholder="One line. What the player sees when they fail a Deception check." />
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-public-persona">Public persona</label>
+        <textarea id="pb-public-persona" name="public_persona" rows="3"
+          placeholder="What the world sees. The mask."></textarea>
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-background">Background</label>
+        <textarea id="pb-background" name="background" rows="4"
+          placeholder="3–5 sentences. Where they came from, what shaped them, what they have done they cannot undo."></textarea>
+      </div>
+
+      <div class="wb-field">
+        <label for="pb-voice-mannerisms">Voice & mannerisms</label>
+        <textarea id="pb-voice-mannerisms" name="voice_mannerisms" rows="3"
+          placeholder="One or two fragments in their actual voice. Physical tells."></textarea>
+      </div>
+    </section>
+
+    <!-- SECTION 5: WRITER'S NOTES -->
+    <section class="wb-panel">
+      <h2>5 · Writer's Notes</h2>
+      <div class="wb-field">
+        <label for="pb-writers-notes">Notes for the reviewer</label>
+        <textarea id="pb-writers-notes" name="writers_notes" rows="4"
+          placeholder="Open questions, justifications for non-standard choices, cross-NPC connections."></textarea>
+        <span class="wb-hint">Required if embraced is set or non-preferred channel is chosen.</span>
+      </div>
+    </section>
+
+    <!-- ACTIONS -->
+    <section class="wb-panel wb-actions-panel">
+      <div id="pb-validation-out"></div>
+      <div class="wb-actions">
+        <button type="button" id="pb-preview-btn" class="wb-btn">Preview</button>
+        <button type="button" id="pb-submit-btn" class="wb-btn wb-btn-primary">Submit to vault</button>
+      </div>
+    </section>
+
+  </form>
+
+  <!-- RIGHT COLUMN — REFERENCE PANEL -->
+  <aside class="wb-builder-aside">
+    <div class="wb-aside-sticky">
+
+      <section class="wb-panel wb-panel-aside" id="pb-ref-panel">
+        <h3>Tradition reference</h3>
+        <div id="pb-ref-content">
+          <p class="wb-hint">Select a tradition to see its profile.</p>
+        </div>
+      </section>
+
+      <section class="wb-panel wb-panel-aside" id="pb-preview-panel" style="display: none;">
+        <h3>Preview</h3>
+        <pre id="pb-preview-out"></pre>
+      </section>
+
+    </div>
+  </aside>
+
+</div>
+
+{% endblock %}

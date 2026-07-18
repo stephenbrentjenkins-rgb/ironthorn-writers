@@ -1,0 +1,8 @@
+# Machine-specific build artifacts — never commit
+.venv/
+__pycache__/
+*.pyc
+workbench_cache.sqlite
+
+# Staging files that get applied manually and then deleted
+STAGING_*.md

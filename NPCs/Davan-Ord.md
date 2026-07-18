@@ -43,7 +43,7 @@ liar_mark_active: false
 debt_flag_active: false
 trust_score: 5
 leverage_held: false
-secrets_known: ["veil_delivery_materials", "ashgate_lane_building_access"]
+secrets_known: ["veil_delivery_materials", "ashgate_lane_building_access", "maren_voss_smuggling_pattern"]
 faction_alert_sent: false
 
 dual_identity: false

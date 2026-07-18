@@ -43,7 +43,7 @@ liar_mark_active: false
 debt_flag_active: false
 trust_score: 5
 leverage_held: false
-secrets_known: []
+secrets_known: ["davan_ord_repair_history"]
 faction_alert_sent: false
 
 dual_identity: false

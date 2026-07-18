@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<section class="wb-panel">
+  <h1>Magic Workbench</h1>
+  <p class="wb-lede">
+    Authoring suite for the Ironthorn magic system. Vault is canonical;
+    every change you make here writes back to <code>NPCs/_Pending/</code> in
+    the same shape the intake watcher already understands.
+  </p>
+</section>
+
+<section class="wb-stats">
+  <div class="wb-stat-card">
+    <div class="wb-stat-num">{{ npc_count }}</div>
+    <div class="wb-stat-label">NPCs indexed</div>
+  </div>
+  <div class="wb-stat-card">
+    <div class="wb-stat-num">{{ practitioner_count }}</div>
+    <div class="wb-stat-label">Practitioners</div>
+  </div>
+  <div class="wb-stat-card">
+    <div class="wb-stat-num">{{ faction_count }}</div>
+    <div class="wb-stat-label">Factions</div>
+  </div>
+  <div class="wb-stat-card">
+    <div class="wb-stat-num">{{ traditions|length }}</div>
+    <div class="wb-stat-label">Named traditions</div>
+  </div>
+</section>
+
+<section class="wb-panel">
+  <h2>Tools</h2>
+  <div class="wb-tool-grid">
+    <a class="wb-tool-card" href="/practitioner">
+      <h3>Practitioner Builder</h3>
+      <p>Author a magic-practicing NPC. Live validation against the
+      tradition / faction-credential matrix; embedded reference panels;
+      output to <code>NPCs/_Pending/</code>.</p>
+      <span class="wb-tool-status">Read-write · v2 build target</span>
+    </a>
+    <a class="wb-tool-card" href="/explorer">
+      <h3>Explorer</h3>
+      <p>Navigable reference for the magic system. Pick a tradition,
+      see its faction, cost surface, corruption profile. Reads
+      <code>_System/Magic.md</code> as canonical.</p>
+      <span class="wb-tool-status">Read-only · skeleton in v1</span>
+    </a>
+    <a class="wb-tool-card" href="/aesthetics">
+      <h3>Aesthetics Guide</h3>
+      <p>Tradition style reference. What does each tradition look,
+      sound, smell like? Staging conventions a writer needs before
+      writing a working scene.</p>
+      <span class="wb-tool-status">Read-only · skeleton in v1</span>
+    </a>
+  </div>
+</section>
+
+<section class="wb-panel wb-panel-muted">
+  <h2>What's here in v0.1</h2>
+  <p>
+    This is the foundation commit. The server runs, the vault is read,
+    the cache is built, the routes resolve, the chrome is consistent.
+    Nothing produces vault content yet — that lands in the Practitioner
+    Builder build (next commit).
+  </p>
+  <p>
+    Click <strong>Refresh</strong> in the nav to rebuild the cache from
+    the vault. The background poller also rebuilds automatically every
+    60 seconds when vault files change.
+  </p>
+</section>
+
+{% endblock %}

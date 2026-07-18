@@ -101,6 +101,8 @@ The Gray player's tension compounds over time: NPCs at alignment extremes (Tier 
 - Modifiers scale with distance from Tier IV — the more extreme the alignment, the larger the modifier.
 - Gray players (Tier IV) receive no alignment modifier to either skill. Both grow at 75% of their normal rate.
 
+The growth-rate multipliers per tier are tabulated in [[Skill-Growth]] under *Alignment growth modifier*.
+
 ---
 
 ## Faction alignment bias — quick reference
@@ -117,4 +119,4 @@ The Gray player's tension compounds over time: NPCs at alignment extremes (Tier 
 
 ---
 
-*[[README|Back to Index]] · [[Deception-Perception-Skills]] · [[NPC-Intelligence-System]] · [[Factions/01-Aureate-Covenant]]*
+*[[README|Back to Index]] · [[Deception-Perception-Skills]] · [[Skill-Growth]] · [[NPC-Intelligence-System]] · [[Factions/01-Aureate-Covenant]]*

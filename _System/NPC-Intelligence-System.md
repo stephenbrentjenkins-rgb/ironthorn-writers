@@ -122,4 +122,4 @@ Certain NPCs cannot be deceived regardless of player Deception skill:
 
 ---
 
-*[[README|Back to Index]] · [[Alignment-Spectrum]] · [[Deception-Perception-Skills]] · [[Attribute-Reference]] · [[NPC-Tier-Reference]]*
+*[[README|Back to Index]] · [[Alignment-Spectrum]] · [[Deception-Perception-Skills]] · [[Skill-Growth]] · [[Attribute-Reference]] · [[NPC-Tier-Reference]]*

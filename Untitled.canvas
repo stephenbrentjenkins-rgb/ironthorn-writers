@@ -1,0 +1,7 @@
+{
+	"nodes":[
+		{"id":"bbc6208f65ee493f","x":-125,"y":-30,"width":250,"height":60,"type":"text","text":""},
+		{"id":"29fd9a5605de1f4b","x":-200,"y":-200,"width":400,"height":400,"type":"file","file":"Untitled.canvas"}
+	],
+	"edges":[]
+}

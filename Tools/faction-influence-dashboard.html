@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ironthorn — Faction Influence Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --bg-2: #12151b;
+    --bg-3: #1a1e26;
+    --border: #2a2f3a;
+    --gold: #f0c040;
+    --gold-dim: #c9a032;
+    --text: #e6e3dc;
+    --text-dim: #8a8a86;
+    --tier-dominant: #f0c040;
+    --tier-contested: #d68a3c;
+    --tier-minority: #6e6253;
+    --tier-absent: #3a3a3a;
+    --error: #d65a4f;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem 1rem;
+    background: var(--bg-2);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--gold);
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin: 0.25rem 0 0 0;
+    letter-spacing: 0.05em;
+  }
+  .meta-line {
+    margin-top: 0.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .meta-line strong { color: var(--gold-dim); font-weight: 400; }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .empty-state, .error-state {
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    padding: 2rem;
+    text-align: center;
+    border-radius: 4px;
+  }
+  .error-state { border-color: var(--error); }
+  .error-state h2 { color: var(--error); margin-top: 0; }
+  .empty-state h2 { color: var(--gold); margin-top: 0; }
+  .empty-state code, .error-state code {
+    font-family: 'Space Mono', monospace;
+    background: var(--bg-3);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+  }
+
+  .district-grid {
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  }
+
+  .district-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+  }
+  .district-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    color: var(--gold);
+    margin: 0 0 0.25rem 0;
+  }
+  .district-card .scope-line {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    word-break: break-all;
+  }
+
+  .faction-row {
+    display: grid;
+    grid-template-columns: 11rem 3rem 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+  }
+  .faction-name {
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .faction-name .anchor {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold-dim);
+    margin-left: 0.4rem;
+  }
+  .faction-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    text-align: right;
+  }
+  .faction-bar {
+    height: 0.6rem;
+    background: var(--bg-3);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .faction-bar-fill {
+    height: 100%;
+    transition: width 200ms ease-out;
+  }
+  .tier-dominant .faction-bar-fill { background: var(--tier-dominant); }
+  .tier-contested .faction-bar-fill { background: var(--tier-contested); }
+  .tier-minority .faction-bar-fill { background: var(--tier-minority); }
+  .tier-absent .faction-bar-fill { background: var(--tier-absent); }
+
+  .anchor-marker {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    background: var(--gold);
+    opacity: 0.7;
+  }
+
+  .tier-legend {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+  .tier-legend .swatch {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 1px;
+    margin-right: 0.3rem;
+    vertical-align: middle;
+  }
+
+  .errors-block {
+    margin-top: 2rem;
+    border: 1px solid var(--error);
+    background: var(--bg-2);
+    padding: 1rem 1.5rem;
+    border-radius: 4px;
+  }
+  .errors-block h3 {
+    color: var(--error);
+    margin: 0 0 0.5rem 0;
+    font-family: 'DM Serif Display', serif;
+  }
+  .errors-block ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding: 1rem 2rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 class="title">⬡ Faction Influence Dashboard</h1>
+  <p class="subtitle">IRONTHORN · AREA FACTIONS ENGINE · v1.0</p>
+  <div class="meta-line" id="meta-line">
+    <span><strong>snapshot:</strong> <span id="meta-generated">loading…</span></span>
+    <span><strong>vault:</strong> <span id="meta-vault">—</span></span>
+    <span><strong>districts:</strong> <span id="meta-count">—</span></span>
+  </div>
+</header>
+
+<main id="main">
+  <div class="empty-state" id="boot-state">
+    <h2>Loading snapshot…</h2>
+    <p>Reading <code>snapshots/latest.json</code></p>
+  </div>
+</main>
+
+<footer>
+  Read-only view. Run <code>vault_state_snapshot.bat</code> to refresh.
+</footer>
+
+<script>
+  // -------------------------------------------------------------------------
+  // Tier model — must match _System/Faction-Influence.md
+  // -------------------------------------------------------------------------
+  function tierFor(value) {
+    if (value <= 14) return 'absent';
+    if (value <= 39) return 'minority';
+    if (value <= 69) return 'contested';
+    return 'dominant';
+  }
+
+  function prettyFaction(slug) {
+    return slug.split('-').map(p => p[0].toUpperCase() + p.slice(1)).join(' ');
+  }
+
+  // -------------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------------
+  function render(snapshot) {
+    document.getElementById('meta-generated').textContent = snapshot.generated_at || '—';
+    document.getElementById('meta-vault').textContent = snapshot.vault_root || '—';
+
+    const worldStateEntries = (snapshot.scopes && snapshot.scopes.WorldState) || [];
+    const influenceEntries = worldStateEntries.filter(e =>
+      e.frontmatter && e.frontmatter.flag_type === 'faction_influence_vector'
+    );
+
+    document.getElementById('meta-count').textContent = String(influenceEntries.length);
+
+    const main = document.getElementById('main');
+    main.innerHTML = '';
+
+    if (influenceEntries.length === 0) {
+      main.innerHTML = `
+        <div class="empty-state">
+          <h2>No districts with faction influence yet</h2>
+          <p>Add files to <code>WorldState/</code> with
+             <code>flag_type: faction_influence_vector</code> and
+             a <code>vector:</code> block, then re-run
+             <code>vault_state_snapshot.bat</code>.</p>
+          <p>See <code>_System/Faction-Influence.md</code> for the model.</p>
+        </div>`;
+      renderErrors(snapshot);
+      return;
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'district-grid';
+
+    influenceEntries.forEach(entry => {
+      grid.appendChild(districtCard(entry));
+    });
+
+    main.appendChild(grid);
+    renderErrors(snapshot);
+  }
+
+  function districtCard(entry) {
+    const card = document.createElement('div');
+    card.className = 'district-card';
+
+    const fm = entry.frontmatter || {};
+    const name = fm.flag_name || entry.path;
+    const scope = fm.scope || '—';
+    const vector = fm.vector || {};
+    const anchors = fm.anchor_floors || {};
+
+    const h = document.createElement('h3');
+    h.textContent = name;
+    card.appendChild(h);
+
+    const scopeLine = document.createElement('div');
+    scopeLine.className = 'scope-line';
+    scopeLine.textContent = scope;
+    card.appendChild(scopeLine);
+
+    const factions = Object.keys(vector).sort((a, b) => vector[b] - vector[a]);
+    factions.forEach(faction => {
+      const value = Number(vector[faction]) || 0;
+      const tier = tierFor(value);
+      const anchor = anchors[faction];
+
+      const row = document.createElement('div');
+      row.className = `faction-row tier-${tier}`;
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'faction-name';
+      nameEl.textContent = prettyFaction(faction);
+      if (anchor != null) {
+        const a = document.createElement('span');
+        a.className = 'anchor';
+        a.textContent = `[anchor ${anchor}]`;
+        nameEl.appendChild(a);
+      }
+
+      const valEl = document.createElement('div');
+      valEl.className = 'faction-value';
+      valEl.textContent = String(value);
+
+      const barEl = document.createElement('div');
+      barEl.className = 'faction-bar';
+      const fill = document.createElement('div');
+      fill.className = 'faction-bar-fill';
+      fill.style.width = `${Math.max(0, Math.min(100, value))}%`;
+      barEl.appendChild(fill);
+      if (anchor != null) {
+        const marker = document.createElement('div');
+        marker.className = 'anchor-marker';
+        marker.style.left = `${Math.max(0, Math.min(100, anchor))}%`;
+        marker.title = `Anchor floor: ${anchor}`;
+        barEl.appendChild(marker);
+      }
+
+      row.appendChild(nameEl);
+      row.appendChild(valEl);
+      row.appendChild(barEl);
+      card.appendChild(row);
+    });
+
+    const legend = document.createElement('div');
+    legend.className = 'tier-legend';
+    legend.innerHTML = `
+      <span><span class="swatch" style="background: var(--tier-dominant)"></span>Dominant 70+</span>
+      <span><span class="swatch" style="background: var(--tier-contested)"></span>Contested 40–69</span>
+      <span><span class="swatch" style="background: var(--tier-minority)"></span>Minority 15–39</span>
+      <span><span class="swatch" style="background: var(--tier-absent)"></span>Absent 0–14</span>
+    `;
+    card.appendChild(legend);
+
+    return card;
+  }
+
+  function renderErrors(snapshot) {
+    const errors = snapshot.errors || [];
+    if (errors.length === 0) return;
+    const main = document.getElementById('main');
+    const block = document.createElement('div');
+    block.className = 'errors-block';
+    const h = document.createElement('h3');
+    h.textContent = `${errors.length} parse errors in snapshot`;
+    block.appendChild(h);
+    const ul = document.createElement('ul');
+    errors.slice(0, 20).forEach(err => {
+      const li = document.createElement('li');
+      li.textContent = `${err.path}: ${err.error}`;
+      ul.appendChild(li);
+    });
+    block.appendChild(ul);
+    if (errors.length > 20) {
+      const more = document.createElement('p');
+      more.textContent = `…and ${errors.length - 20} more.`;
+      block.appendChild(more);
+    }
+    main.appendChild(block);
+  }
+
+  function showError(message, detail) {
+    const main = document.getElementById('main');
+    main.innerHTML = `
+      <div class="error-state">
+        <h2>Could not load snapshot</h2>
+        <p>${message}</p>
+        ${detail ? `<p><code>${detail}</code></p>` : ''}
+        <p>Generate the snapshot first: run <code>vault_state_snapshot.bat</code>
+           in <code>Tools/</code>.</p>
+      </div>`;
+  }
+
+  // -------------------------------------------------------------------------
+  // Load
+  //
+  // Strategy: try fetch() first (works when served via http://). If that
+  // fails (file://, CORS), fall back to a script-tag JSONP-ish trick that
+  // can't actually work for arbitrary JSON — so just tell the user to
+  // open via a local HTTP server. Most modern browsers block fetch() of
+  // file:// URLs from a file:// page.
+  //
+  // Simple mitigation: if fetch fails, surface a clear message with the
+  // one-line python http.server invocation.
+  // -------------------------------------------------------------------------
+  async function load() {
+    try {
+      const resp = await fetch('snapshots/latest.json', { cache: 'no-store' });
+      if (!resp.ok) {
+        showError(`HTTP ${resp.status} reading snapshots/latest.json`);
+        return;
+      }
+      const snap = await resp.json();
+      render(snap);
+    } catch (err) {
+      // Most likely: file:// fetch blocked by browser
+      const msg = String(err && err.message || err);
+      let detail = '';
+      if (location.protocol === 'file:') {
+        detail = `Browsers block fetch() from file:// pages. Run a local server in Tools/:  python -m http.server 7844  then open http://localhost:7844/faction-influence-dashboard.html`;
+      } else {
+        detail = msg;
+      }
+      showError('Could not read the snapshot.', detail);
+    }
+  }
+
+  load();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Magic Workbench{% endblock %} — Ironthorn</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='workbench.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='workbench-builder.css') }}" />
+</head>
+<body>
+  <header class="wb-header">
+    <div class="wb-header-inner">
+      <a href="/" class="wb-brand">
+        <span class="wb-brand-mark">◉</span>
+        <span class="wb-brand-text">Magic Workbench</span>
+        <span class="wb-brand-version">v0.3</span>
+      </a>
+      <nav class="wb-nav">
+        <a href="/" class="wb-nav-link {% if request.path == '/' %}active{% endif %}">Home</a>
+        <a href="/practitioner" class="wb-nav-link {% if request.path.startswith('/practitioner') %}active{% endif %}">Practitioner Builder</a>
+        <a href="/explorer" class="wb-nav-link {% if request.path.startswith('/explorer') %}active{% endif %}">Explorer</a>
+        <a href="/aesthetics" class="wb-nav-link {% if request.path.startswith('/aesthetics') %}active{% endif %}">Aesthetics</a>
+        <button id="wb-refresh" class="wb-nav-button" title="Rebuild cache from vault">↻ Refresh</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wb-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="wb-footer">
+    <span>Vault canonical · SQLite cached · Local on :7844</span>
+    <span id="wb-status"></span>
+  </footer>
+
+  <script src="{{ url_for('static', filename='workbench-builder.js') }}" defer></script>
+
+  <script>
+    document.getElementById("wb-refresh").addEventListener("click", async function () {
+      const btn = this;
+      const status = document.getElementById("wb-status");
+      btn.disabled = true;
+      btn.textContent = "↻ Refreshing...";
+      try {
+        const res = await fetch("/api/refresh", { method: "POST" });
+        const data = await res.json();
+        status.textContent = data.ok ? "Cache rebuilt." : "Refresh failed.";
+        setTimeout(function () { window.location.reload(); }, 400);
+      } catch (e) {
+        status.textContent = "Refresh error: " + e.message;
+        btn.disabled = false;
+        btn.textContent = "↻ Refresh";
+      }
+    });
+  </script>
+</body>
+</html>

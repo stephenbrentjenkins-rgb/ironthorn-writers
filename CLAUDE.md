@@ -36,7 +36,10 @@ or critiquing any NPC content.
 - `World/` — Districts, locations, world lore.
 - `_System/` — Reference materials (alignment spectrum, attribute
   reference, return taxonomy, tier reference, intelligence system,
-  cross-NPC connection map).
+  cross-NPC connection map, **Story Engine architecture** — see below).
+- `WorldState/`, `PhaseLayers/`, `Questlines/`, `DailyLife/`,
+  `StoryInstances/`, `Instances/` — the Story Engine content scopes.
+  Each folder has a `_README.md` orienting writers to what goes there.
 - `_System/Writer-Certification/` — Writer Primer, Quiz, Glossary,
   Submission Form template, DevTools README.
 - `_System/Writer-Certification/Records/` — Approval and return
@@ -113,6 +116,53 @@ app password, and (optional) Sheet publish-to-web CSV URL.
 **This file contains secrets** — must be in `.gitignore`. The
 example template is `manager_config.example.json`.
 
+## Story Engine
+
+The vault hosts a story engine — a typed model for how main story,
+phasing, faction control, and everyday-life systems fit together.
+Authored 2026-05-02. Read these in order before authoring any file
+in the new content scopes:
+
+1. `_System/Story-Architecture.md` — the six scopes (World, Phase,
+   Questline, Daily, StoryInstance, Instance), cross-scope reference
+   rules, the service floor invariant, in-world legibility surfaces.
+2. `_System/Faction-Influence.md` — continuous backing, discrete
+   tiers (Absent / Minority / Contested / Dominant), anchor floors.
+3. `_System/Simulation-Tick.md` — daily simulation cadence, the
+   Player Interaction Pause rule, hard bounds on the simulation.
+4. `_System/NPC-Action-Vocabulary.md` — the ten typed actions NPCs
+   can take on each other and the priority math that drives them.
+5. `_System/Area-Factions-Engine.md` — the engine spec itself, with
+   five subsystems and a planned implementation order.
+
+Templates for the new scopes live in `_Templates/`:
+`WorldState-Flag-Template.md`, `PhaseLayer-Template.md`,
+`Questline-Beat-Template.md`. The existing `NPC-Template-v3.md`
+remains the NPC standard.
+
+**Build status:** architecture and templates done; Python snapshot
+generator and Faction Influence Dashboard are next on the build
+order (see `Area-Factions-Engine.md` § *Implementation order*).
+
+## Player skills and growth
+
+The player's skill surface is small and load-bearing. Two skills:
+**Deception** and **Perception**. Both are documented across two
+docs that should be read together:
+
+1. `_System/Deception-Perception-Skills.md` — what the skills *are*:
+   rank ladder, dialogue gates, success formula, Liar's Mark,
+   Manipulate option, Gray-path penalty.
+2. `_System/Skill-Growth.md` — how the skills *grow*: percent-bar
+   model, sought-after success, failed-roll secondary d100,
+   difficulty scaling, anti-grind diminishing returns, alignment
+   growth modifier table.
+
+The growth doc was extracted from the parent skills doc to keep
+tuning surfaces isolated and to prepare cleanly for additional
+player skills if any are authored post-PoC. Don't fold growth
+back into the parent skills doc — it's deliberately separate.
+
 ## Standards and conventions
 
 - NPC names use hyphens in slugs: `Brother-Aldric.md` not
@@ -152,5 +202,7 @@ example template is `manager_config.example.json`.
   intake-only download).
 - Manager Board v1.0 is functional. Sheet History tab requires
   configuring `sheet_csv_url` in `manager_config.json`.
-- The vault is not yet in source control — GitHub setup is the next
-  scheduled task.
+- The vault is in source control at
+  `github.com/stephenbrentjenkins-rgb/ironthorn-writers` (private).
+  `manager_config.json` is gitignored — only the
+  `manager_config.example.json` template is tracked.

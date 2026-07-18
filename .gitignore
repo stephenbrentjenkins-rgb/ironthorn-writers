@@ -31,3 +31,7 @@ desktop.ini
 *.swp
 *~
 *.bak
+
+# Vault state snapshots — generated artifact, not source.
+# latest.json is also gitignored; regenerate via vault_state_snapshot.bat.
+Tools/snapshots/

@@ -85,6 +85,12 @@ When a player fails a Deception check with an NPC:
 
 ---
 
+## Skill growth
+
+How Deception and Perception ranks rise over play — including the unit of growth, the failed-roll secondary check, difficulty scaling, anti-grind rules, and the alignment growth modifier table — is specified in [[Skill-Growth]]. The growth mechanic was extracted into its own document because it applies the same way to both skills (and to any future player skill), and because tuning will be heavy and ongoing.
+
+---
+
 ## Gray path tension
 
 A Gray player investing in both skills:
@@ -109,4 +115,4 @@ Truth options are always available and always ungated. Choosing truth when a lie
 
 ---
 
-*[[README|Back to Index]] · [[Alignment-Spectrum]] · [[NPC-Intelligence-System]] · [[Attribute-Reference]]*
+*[[README|Back to Index]] · [[Alignment-Spectrum]] · [[Skill-Growth]] · [[NPC-Intelligence-System]] · [[Attribute-Reference]]*

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Aesthetics Guide{% endblock %}
+{% block content %}
+
+<section class="wb-panel">
+  <h1>Tradition Aesthetics Guide</h1>
+  <p class="wb-lede">
+    What does each tradition look, sound, smell like? Staging
+    conventions a writer needs before scripting a working scene.
+  </p>
+</section>
+
+<section class="wb-panel wb-panel-placeholder">
+  <h2>Coming in v0.3 — and growing thereafter</h2>
+  <p>
+    Per-tradition entries fill in as content is authored. Each
+    tradition card eventually carries:
+  </p>
+  <ul>
+    <li><strong>Visual signature</strong> — what a working looks like; colour, motion, residue</li>
+    <li><strong>Audible signature</strong> — what it sounds like; chant, chime, silence, resonance</li>
+    <li><strong>Sensory tells</strong> — smell, temperature, the small somatic things a witness notices</li>
+    <li><strong>Staging by use</strong> — public ritual vs private working; how the same spell looks different by context</li>
+    <li><strong>Cross-tradition recognition</strong> — what practitioners of <em>other</em> traditions notice when they witness this one</li>
+  </ul>
+  <p>
+    This doc is the canonical reference; the Practitioner Builder's
+    "Channelling style" field cross-links into it.
+  </p>
+</section>
+
+<section class="wb-panel">
+  <h3>Traditions awaiting content</h3>
+  <div class="wb-aesthetics-grid">
+    {% for t in traditions %}
+      <div class="wb-aesthetics-card">
+        <h4>{{ t }}</h4>
+        <p><em>Aesthetic profile not yet authored.</em></p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
